@@ -11,7 +11,7 @@ Full-stack platform that receives real-time expedition data from an AI agent ope
 - **Supabase PostgreSQL**: Stores all structured data (track, weather, reflections, messages, progress, route analyses, photo metadata).
 - **Supabase Storage + CDN**: JPEG photos uploaded by the agent are stored in a `photos` bucket, served via Supabase's built-in Cloudflare CDN. No extra CDN config needed.
 - **Upsert semantics for singletons**: `/api/track` and `/api/progress` always overwrite — one canonical row. All others append new rows.
-- **Public GET endpoints**: Frontend fetches data via internal Next.js server components or public GET API routes. No auth required for reads.
+- **No direct DB access from browser**: All data fetching is server-side (Server Components or API routes). Browser only touches Supabase CDN for photo URLs.
 
 ## Request Flow
 
@@ -93,17 +93,15 @@ All API routes use the Supabase `service_role` key (never exposed to the browser
 
 ### Railway
 - **Service**: Single Next.js app (web service). Auto-deploy from GitHub `main` branch.
-- **Region**: US West (closest to South America for satellite latency).
-- **Plan**: Hobby ($5/mo) — covers always-on Node process + custom domain if needed.
-- **Env vars set in Railway dashboard**: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `REMOTE_SYNC_API_KEY`, `NODE_ENV=production`.
+- **Config**: `railway.toml` — build `npm run build`, start `npm run start`, healthcheck `/`.
 - **No Railway PostgreSQL plugin** — DB is fully managed by Supabase.
+- **Status**: Pending — needs GitHub repo connected + env vars set in dashboard.
 
 ### Supabase
 - **Plan**: Free tier (sufficient for expedition scope).
-- **PostgreSQL**: 7 tables (see schema). Direct connection via `SUPABASE_DATABASE_URL` only used for migrations if needed.
-- **Storage bucket**: `photos` — public bucket, served via Cloudflare CDN edge (`*.supabase.co/storage/v1/object/public/photos/...`).
-- **Auth**: Service role key on all server-side writes. Anon key reserved for future public read clients.
-- **RLS**: Disabled on all tables (service role bypasses it). Can be enabled later for multi-tenancy.
+- **PostgreSQL**: 7 tables applied ✅. RLS disabled (service role bypasses it).
+- **Storage bucket**: `photos` (public) ✅ — Cloudflare CDN at `*.supabase.co/storage/v1/object/public/photos/...`.
+- **Status**: ✅ Live and tested.
 
 ### Deployment Flow
 
@@ -121,10 +119,10 @@ graph LR
 
 | Variable | Where set | Used for |
 |---|---|---|
-| `SUPABASE_URL` | `.env` + Railway | Supabase client init |
-| `SUPABASE_ANON_KEY` | `.env` + Railway | `sb_publishable_...` — public read client |
-| `SUPABASE_SERVICE_ROLE_KEY` | `.env` + Railway | `sb_secret_...` — server writes, bypasses RLS |
-| `REMOTE_SYNC_API_KEY` | `.env` + Railway | Validates agent Bearer token |
+| `SUPABASE_URL` | `.env` ✅ + Railway ⏳ | Supabase client init |
+| `SUPABASE_ANON_KEY` | `.env` ✅ + Railway ⏳ | Legacy JWT anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | `.env` ✅ + Railway ⏳ | Server writes, bypasses RLS |
+| `REMOTE_SYNC_API_KEY` | `.env` ✅ + Railway ⏳ | Agent Bearer token |
 
 ## Commit History
 
@@ -138,4 +136,6 @@ graph LR
 | 6   | POST /api/route-analysis                         | Done        |
 | 7   | POST /api/photos (multipart + Storage upload)    | Done        |
 | 8   | backend.md — API reference for agent client      | Done        |
-| 9   | Deploy to Railway + env vars config              | Planned     |
+| 9   | railway.toml + GitHub repo + Railway project     | In Progress |
+| 10  | Set env vars in Railway dashboard                | Planned     |
+| 11  | Verify live deploy + end-to-end test             | Planned     |
