@@ -1,23 +1,24 @@
 # Antartia Backend — API Reference
 
-Base URL: `https://your-railway-app.railway.app` (dev: `http://localhost:3000`)
+Base URL (production): `https://jubilant-upliftment-production-8895.up.railway.app`
+Base URL (dev): `http://localhost:3000`
 
 ## Authentication
 
-All endpoints require a Bearer token in every request:
+Two tokens — one for writing (agent), one for reading (frontend):
+
+| Token | Value | Permissions |
+|-------|-------|-------------|
+| **Write** (`REMOTE_SYNC_API_KEY`) | `17ba5bf6a01faf0c808c36fe2fd3de87449b40275de9e652f81eda422deec295` | POST only — agent use |
+| **Read** (`REMOTE_READ_API_KEY`) | `314e95b8854efcf95e0ca563bf5030e50638358ef3068c97eac176d6e7496aa5` | GET only — frontend use |
+
+Include the write token in every agent request:
 
 ```
 Authorization: Bearer 17ba5bf6a01faf0c808c36fe2fd3de87449b40275de9e652f81eda422deec295
 ```
 
-Missing or invalid token → `401 Unauthorized`.
-
-**Token:**
-```
-17ba5bf6a01faf0c808c36fe2fd3de87449b40275de9e652f81eda422deec295
-```
-
-Set this as `REMOTE_SYNC_API_KEY` in your agent's environment.
+Missing, wrong, or read token on a POST → `401 Unauthorized`.
 
 ---
 
