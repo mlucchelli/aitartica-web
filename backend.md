@@ -7,10 +7,17 @@ Base URL: `https://your-railway-app.railway.app` (dev: `http://localhost:3000`)
 All endpoints require a Bearer token in every request:
 
 ```
-Authorization: Bearer <REMOTE_SYNC_API_KEY>
+Authorization: Bearer 17ba5bf6a01faf0c808c36fe2fd3de87449b40275de9e652f81eda422deec295
 ```
 
 Missing or invalid token → `401 Unauthorized`.
+
+**Token:**
+```
+17ba5bf6a01faf0c808c36fe2fd3de87449b40275de9e652f81eda422deec295
+```
+
+Set this as `REMOTE_SYNC_API_KEY` in your agent's environment.
 
 ---
 
