@@ -155,16 +155,49 @@ These sections are currently rendering placeholder/hardcoded content and need to
 
 ## Commit History
 
-| #   | Description                                      | Status      |
-|-----|--------------------------------------------------|-------------|
-| 1   | Init Next.js 15 project + env setup              | Done        |
-| 2   | Supabase schema (all 7 tables + storage bucket)  | Done        |
-| 3   | Supabase client + Bearer auth middleware         | Done        |
-| 4   | POST /api/track, /api/weather, /api/progress     | Done        |
-| 5   | POST /api/reflections, /api/messages             | Done        |
-| 6   | POST /api/route-analysis                         | Done        |
-| 7   | POST /api/photos (multipart + Storage upload)    | Done        |
-| 8   | backend.md — API reference for agent client      | Done        |
-| 9   | railway.toml + GitHub repo + Railway project     | In Progress |
-| 10  | Set env vars in Railway dashboard                | Planned     |
-| 11  | Verify live deploy + end-to-end test             | Planned     |
+| #   | Description                                                   | Status      |
+|-----|---------------------------------------------------------------|-------------|
+| 1   | Init Next.js 15 project + env setup                           | ✅ Done     |
+| 2   | Supabase schema (all 7 tables + storage bucket)               | ✅ Done     |
+| 3   | Supabase client + Bearer auth middleware                      | ✅ Done     |
+| 4   | POST /api/track, /api/weather, /api/progress                  | ✅ Done     |
+| 5   | POST /api/reflections, /api/messages                          | ✅ Done     |
+| 6   | POST /api/route-analysis                                      | ✅ Done     |
+| 7   | POST /api/photos (multipart + Storage upload)                 | ✅ Done     |
+| 8   | backend.md — API reference for agent client                   | ✅ Done     |
+| 9   | Public frontend — stats bar, map, mission log, photo gallery  | ✅ Done     |
+| 10  | Wire map track to `gps_points` (real GPS data)                | ⏳ Next     |
+| 11  | Wire LAT/LON header to last `gps_points` or `progress.current_position` | ⏳ Next |
+| 12  | Wire Mission Log to today's `reflections` + `messages`        | ⏳ Next     |
+| 13  | Wire Photo Gallery to real `photos` from Supabase Storage     | ⏳ Next     |
+| 14  | Railway deploy + env vars + end-to-end test                   | ⏳ Planned  |
+
+## Next Steps (Priority Order)
+
+### 1. Map Track — `gps_points` (High)
+- `ExpeditionMap.tsx` currently uses a hardcoded `TRACK` array
+- Fetch all rows from `gps_points ORDER BY recorded_at ASC` server-side in `page.tsx`
+- Pass as prop to `MapWrapper` → `ExpeditionMap`
+- Auto-center/zoom map on the actual bounding box of the track
+
+### 2. Last Position Header (High)
+- LAT/LON in map panel header are hardcoded
+- Query: `gps_points ORDER BY recorded_at DESC LIMIT 1` or read `progress.current_position`
+- Format: `64.45° S` / `57.10° W` style (already styled correctly)
+
+### 3. Mission Log — Today's Entries (Medium)
+- Replace hardcoded `LOG_ENTRIES` with live data from DB
+- Merge `reflections` (today) + `messages` (today) sorted by time
+- Tag: reflection → `log-tag-reflection`, message → `log-tag-message`
+- Fallback: empty state if no entries yet for today
+
+### 4. Photo Gallery — The Polar Prism (Medium)
+- Replace picsum placeholders with real `photos` from Supabase Storage
+- Day tabs: derive from `SELECT DISTINCT recorded_at::date FROM photos ORDER BY 1 DESC LIMIT 4`
+- Filter by selected day (client-side tab switching or server route param)
+- Show `vision_summary` or `agent_quote` as overlay label when available
+
+### 5. Railway Deploy (Blocker for production)
+- Connect GitHub repo to Railway service
+- Set all env vars in Railway dashboard
+- Verify live deploy + agent POST end-to-end test
