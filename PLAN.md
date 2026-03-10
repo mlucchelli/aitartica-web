@@ -1,4 +1,5 @@
-# Antartia Web — Expedition Tracking Platform
+# AITARTICA Web — Expedition Tracking Platform
+
 
 ## Overview
 
@@ -124,32 +125,20 @@ graph LR
 | `SUPABASE_SERVICE_ROLE_KEY` | `.env` ✅ + Railway ⏳ | Server writes, bypasses RLS |
 | `REMOTE_SYNC_API_KEY` | `.env` ✅ + Railway ⏳ | Agent Bearer token |
 
-## Frontend — Data Wiring (Pending)
+## Frontend — Data Wiring
 
-These sections are currently rendering placeholder/hardcoded content and need to be wired to the DB:
+| Section | Source | Status |
+|---------|--------|--------|
+| Trajectory Map | `gps_points` ASC, fallback to placeholder | ✅ Done |
+| LAT/LON header | Last `gps_points` row, hidden when empty | ✅ Done |
+| Mission Log | Today's `reflections` + `messages`, fallback to placeholder | ✅ Done |
+| Photo Gallery | `photos` ordered by `significance_score` DESC, fallback to picsum | ✅ Done |
 
-### Trajectory Map (`gps_points`)
-- **What**: Show all GPS points recorded during the full expedition as a continuous track line.
-- **Source**: `gps_points` table, ordered by `recorded_at ASC` — all rows, no date filter.
-- **Current map** (`ExpeditionMap.tsx`): hardcoded TRACK array → replace with data fetched server-side and passed as prop.
-
-### Map Header — Last Position (`gps_points` or `progress`)
-- **What**: LAT / LON display in the map panel header shows the last recorded position.
-- **Source**: `gps_points ORDER BY recorded_at DESC LIMIT 1`, or `progress.current_position` (JSONB `{lat, lon}`).
-- **Note**: ALT is not displayed (removed from UI).
-
-### Mission Log (`reflections` + `messages`)
-- **What**: Show only today's entries — the day's reflection and any messages sent today, merged and ordered chronologically.
-- **Source**:
-  - `reflections WHERE date = CURRENT_DATE` (one row max)
-  - `messages WHERE published_at::date = CURRENT_DATE ORDER BY published_at ASC`
-- **Current**: hardcoded `LOG_ENTRIES` array in `page.tsx`.
-
-### Photo Gallery — The Polar Prism (`photos`)
-- **What**: Show real photos uploaded by the agent, filtered by selected day tab.
-- **Source**: `photos WHERE recorded_at::date = <selected_date> ORDER BY significance_score DESC`.
-- **Day tabs**: derive available days from `SELECT DISTINCT recorded_at::date FROM photos ORDER BY 1 DESC LIMIT 4`.
-- **Current**: hardcoded `MOSAIC_PHOTOS` with picsum placeholders.
+**Remaining UI work (post-deploy):**
+- Photo Gallery day tabs (filter by day, derive available days from DB)
+- Daily Reflection section wired to `reflections` (currently hardcoded)
+- Stats: add `photos_captured_total` as 6th stat from `progress`
+- HEADING in map overlay: wire to last `route_analyses.bearing_compass`
 
 ---
 
@@ -166,38 +155,18 @@ These sections are currently rendering placeholder/hardcoded content and need to
 | 7   | POST /api/photos (multipart + Storage upload)                 | ✅ Done     |
 | 8   | backend.md — API reference for agent client                   | ✅ Done     |
 | 9   | Public frontend — stats bar, map, mission log, photo gallery  | ✅ Done     |
-| 10  | Wire map track to `gps_points` (real GPS data)                | ⏳ Next     |
-| 11  | Wire LAT/LON header to last `gps_points` or `progress.current_position` | ⏳ Next |
-| 12  | Wire Mission Log to today's `reflections` + `messages`        | ⏳ Next     |
-| 13  | Wire Photo Gallery to real `photos` from Supabase Storage     | ⏳ Next     |
-| 14  | Railway deploy + env vars + end-to-end test                   | ⏳ Planned  |
+| 10  | Wire map + LAT/LON to `gps_points`                            | ✅ Done     |
+| 11  | Wire Mission Log to today's `reflections` + `messages`        | ✅ Done     |
+| 12  | Wire Photo Gallery to `photos` from Supabase Storage          | ✅ Done     |
+| 13  | Railway deploy + env vars + end-to-end test                   | ⏳ Next     |
 
-## Next Steps (Priority Order)
+## Next Step — Railway Deploy
 
-### 1. Map Track — `gps_points` (High)
-- `ExpeditionMap.tsx` currently uses a hardcoded `TRACK` array
-- Fetch all rows from `gps_points ORDER BY recorded_at ASC` server-side in `page.tsx`
-- Pass as prop to `MapWrapper` → `ExpeditionMap`
-- Auto-center/zoom map on the actual bounding box of the track
-
-### 2. Last Position Header (High)
-- LAT/LON in map panel header are hardcoded
-- Query: `gps_points ORDER BY recorded_at DESC LIMIT 1` or read `progress.current_position`
-- Format: `64.45° S` / `57.10° W` style (already styled correctly)
-
-### 3. Mission Log — Today's Entries (Medium)
-- Replace hardcoded `LOG_ENTRIES` with live data from DB
-- Merge `reflections` (today) + `messages` (today) sorted by time
-- Tag: reflection → `log-tag-reflection`, message → `log-tag-message`
-- Fallback: empty state if no entries yet for today
-
-### 4. Photo Gallery — The Polar Prism (Medium)
-- Replace picsum placeholders with real `photos` from Supabase Storage
-- Day tabs: derive from `SELECT DISTINCT recorded_at::date FROM photos ORDER BY 1 DESC LIMIT 4`
-- Filter by selected day (client-side tab switching or server route param)
-- Show `vision_summary` or `agent_quote` as overlay label when available
-
-### 5. Railway Deploy (Blocker for production)
-- Connect GitHub repo to Railway service
-- Set all env vars in Railway dashboard
-- Verify live deploy + agent POST end-to-end test
+1. Connect GitHub repo to Railway service
+2. Set env vars in Railway dashboard:
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `REMOTE_SYNC_API_KEY`
+   - `REMOTE_READ_API_KEY`
+3. Verify live deploy — hit `/` and confirm page loads
+4. End-to-end test: agent POST to `/api/progress`, `/api/location`, reload page, confirm stats update

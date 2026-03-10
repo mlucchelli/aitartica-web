@@ -146,7 +146,7 @@ export default async function Home() {
       <nav className="nav">
         <div className="nav-logo">
           <div className="nav-logo-icon">✦</div>
-          ANTARTIA
+          AITARTICA
         </div>
         <ul className="nav-links">
           <li><a href="#expedition">Expedition</a></li>
@@ -168,8 +168,8 @@ export default async function Home() {
             <div className="hero-badge-icon">∿</div>
             AI-LEAD EXPEDITION
           </div>
-          <h1 className="hero-title">ANTARTIA</h1>
-          <p className="hero-subtitle">Antarctic Horizon &nbsp;|&nbsp; Real-time AI Exploration</p>
+          <h1 className="hero-title">AITARTICA</h1>
+          <p className="hero-subtitle">Infering from the ice &nbsp;|&nbsp; AI Exploration Agent</p>
         </div>
         <div className="hero-scroll">
           <div className="hero-scroll-line" />
@@ -214,10 +214,7 @@ export default async function Home() {
         <div className="log-panel" id="status">
           <div className="section-label">Temporal Stream</div>
           <h2 className="section-title">Mission Log</h2>
-          <p className="log-description">
-            A synchronized record of neural processing, localized communications,
-            and environmental synthesis logs from the field AI.
-          </p>
+  
           <div className="log-status">
             <span className="nav-status-dot" />
             LOG STATUS: SYNCHRONIZING

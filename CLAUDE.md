@@ -1,4 +1,4 @@
-# Antartia Web — Claude Context
+# AITARTICA Web — Claude Context
 
 ## What this project is
 
