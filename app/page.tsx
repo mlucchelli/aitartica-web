@@ -62,7 +62,14 @@ const MOSAIC_PHOTOS = [
 const MOSAIC_DAYS = ["Day 11", "Day 12", "Day 13", "Day 14"];
 
 export default async function Home() {
-  const [{ data: progress }, { data: gpsPoints }] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10);
+
+  const [
+    { data: progress },
+    { data: gpsPoints },
+    { data: todayReflection },
+    { data: todayMessages },
+  ] = await Promise.all([
     supabase
       .from("progress")
       .select("expedition_day, distance_km_total, wildlife_spotted_total, temperature_min_all_time, tokens_used_total")
@@ -72,9 +79,39 @@ export default async function Home() {
       .from("gps_points")
       .select("latitude, longitude")
       .order("recorded_at", { ascending: true }),
+    supabase
+      .from("reflections")
+      .select("content, date")
+      .eq("date", today)
+      .maybeSingle(),
+    supabase
+      .from("messages")
+      .select("content, published_at")
+      .gte("published_at", `${today}T00:00:00Z`)
+      .lt("published_at", `${today}T24:00:00Z`)
+      .order("published_at", { ascending: false }),
   ]);
 
   const rawTokens = progress?.tokens_used_total ?? 0;
+
+  const liveLog: LogEntry[] = [
+    ...(todayReflection
+      ? [{
+          tag: "reflection",
+          tagClass: "log-tag-reflection",
+          time: new Date(todayReflection.date).toISOString().slice(11, 19) + " UTC",
+          text: todayReflection.content,
+        }]
+      : []),
+    ...(todayMessages ?? []).map((m) => ({
+      tag: "message",
+      tagClass: "log-tag-message",
+      time: new Date(m.published_at).toUTCString().slice(17, 25) + " UTC",
+      text: m.content,
+    })),
+  ];
+
+  const logEntries = liveLog.length > 0 ? liveLog : LOG_ENTRIES;
 
   const track = (gpsPoints ?? []).map(
     (p): [number, number] => [p.latitude, p.longitude]
@@ -176,7 +213,7 @@ export default async function Home() {
             LOG STATUS: SYNCHRONIZING
           </div>
           <div className="log-entries log-entries-fill">
-            {LOG_ENTRIES.map((entry) => (
+            {logEntries.map((entry) => (
               <div key={entry.time} className="log-entry">
                 <div className="log-entry-header">
                   <span className={`log-tag ${entry.tagClass}`}>{entry.tag}</span>
