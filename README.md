@@ -1,6 +1,6 @@
-# Antartia Web
+# AITARTICA Web
 
-Real-time expedition tracking platform for the Antartia Antarctic voyage. An AI agent aboard the ship syncs GPS routes, weather, photos, reflections, and navigation data to this server over satellite. The public frontend visualizes the expedition live.
+Real-time expedition tracking platform for the AITARTICA Antarctic voyage. An AI agent aboard the ship syncs GPS routes, weather, photos, reflections, and navigation data to this server over satellite. The public frontend visualizes the expedition live.
 
 ## Stack
 

@@ -1,4 +1,4 @@
-# Antartia Web — Project Notes
+# AITARTICA Web — Project Notes
 
 ## What is this?
 
