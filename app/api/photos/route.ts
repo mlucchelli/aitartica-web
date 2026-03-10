@@ -8,51 +8,43 @@ export async function POST(req: NextRequest) {
   const metadataRaw = formData.get("metadata") as string | null;
 
   if (!file || !metadataRaw) {
-    return NextResponse.json(
-      { error: "Missing file or metadata" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Missing file or metadata" }, { status: 400 });
   }
 
   let metadata: Record<string, unknown>;
   try {
     metadata = JSON.parse(metadataRaw);
   } catch {
-    return NextResponse.json(
-      { error: "Invalid metadata JSON" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid metadata JSON" }, { status: 400 });
   }
 
   const fileName = metadata.file_name as string;
-  const recordedAt = metadata.recorded_at as string | null;
+  if (!fileName) {
+    return NextResponse.json({ error: "Missing required field: file_name" }, { status: 400 });
+  }
+
+  const recordedAt = (metadata.recorded_at as string) ?? null;
   const datePart = recordedAt
     ? recordedAt.slice(0, 10)
     : new Date().toISOString().slice(0, 10);
   const storagePath = `${datePart}/${fileName}`;
 
-  // Upload to Supabase Storage
   const bytes = await file.arrayBuffer();
   const { error: uploadError } = await supabase.storage
     .from("photos")
-    .upload(storagePath, bytes, {
-      contentType: "image/jpeg",
-      upsert: true,
-    });
+    .upload(storagePath, bytes, { contentType: "image/jpeg", upsert: true });
 
   if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    console.error("[/api/photos] upload:", uploadError.message);
+    return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 });
   }
 
-  const { data: urlData } = supabase.storage
-    .from("photos")
-    .getPublicUrl(storagePath);
+  const { data: urlData } = supabase.storage.from("photos").getPublicUrl(storagePath);
 
-  // Insert metadata row
   const { error: dbError } = await supabase.from("photos").insert({
     file_name: fileName,
     file_url: urlData.publicUrl,
-    recorded_at: recordedAt ?? null,
+    recorded_at: recordedAt,
     latitude: (metadata.latitude as number) ?? null,
     longitude: (metadata.longitude as number) ?? null,
     significance_score: (metadata.significance_score as number) ?? null,
@@ -65,7 +57,8 @@ export async function POST(req: NextRequest) {
   });
 
   if (dbError) {
-    return NextResponse.json({ error: dbError.message }, { status: 500 });
+    console.error("[/api/photos] db:", dbError.message);
+    return NextResponse.json({ error: "Failed to save photo metadata" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, file_url: urlData.publicUrl });

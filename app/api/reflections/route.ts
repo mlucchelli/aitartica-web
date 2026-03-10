@@ -2,7 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  if (!body.date || !body.content) {
+    return NextResponse.json(
+      { error: "Missing required fields: date, content" },
+      { status: 400 }
+    );
+  }
 
   const { error } = await supabase.from("reflections").upsert(
     {
@@ -14,7 +26,8 @@ export async function POST(req: NextRequest) {
   );
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[/api/reflections]", error.message);
+    return NextResponse.json({ error: "Failed to save reflection" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

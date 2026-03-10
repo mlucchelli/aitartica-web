@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
   const { error } = await supabase.from("progress").upsert({
     id: 1,
@@ -19,7 +24,8 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[/api/progress]", error.message);
+    return NextResponse.json({ error: "Failed to save progress" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

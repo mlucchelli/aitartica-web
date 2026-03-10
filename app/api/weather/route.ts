@@ -2,7 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  if (body.latitude == null || body.longitude == null || !body.recorded_at) {
+    return NextResponse.json(
+      { error: "Missing required fields: latitude, longitude, recorded_at" },
+      { status: 400 }
+    );
+  }
 
   const { error } = await supabase.from("weather_snapshots").insert({
     latitude: body.latitude,
@@ -19,7 +31,8 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[/api/weather]", error.message);
+    return NextResponse.json({ error: "Failed to save weather snapshot" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

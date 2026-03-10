@@ -2,27 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-
-  const feature = body?.features?.[0];
-  if (!feature) {
-    return NextResponse.json({ error: "Invalid GeoJSON" }, { status: 400 });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { properties } = feature;
+  const b = body as Record<string, unknown>;
+  const features = b?.features as unknown[] | undefined;
+  const feature = features?.[0] as Record<string, unknown> | undefined;
+
+  if (!feature) {
+    return NextResponse.json({ error: "Invalid GeoJSON: missing features" }, { status: 400 });
+  }
+
+  const properties = feature.properties as Record<string, unknown> | undefined;
 
   const { error } = await supabase.from("track_snapshots").upsert({
     id: 1,
     geojson: body,
-    total_points: properties.total_points ?? null,
-    distance_km: properties.distance_km ?? null,
-    recorded_at_first: properties.recorded_at_first ?? null,
-    recorded_at_last: properties.recorded_at_last ?? null,
-    last_updated: properties.last_updated ?? null,
+    total_points: (properties?.total_points as number) ?? null,
+    distance_km: (properties?.distance_km as number) ?? null,
+    recorded_at_first: (properties?.recorded_at_first as string) ?? null,
+    recorded_at_last: (properties?.recorded_at_last as string) ?? null,
+    last_updated: (properties?.last_updated as string) ?? null,
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[/api/track]", error.message);
+    return NextResponse.json({ error: "Failed to save track" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
