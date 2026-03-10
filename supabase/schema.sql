@@ -4,6 +4,7 @@
 -- ============================================================
 
 -- Full GPS route. Upserted on each agent sync (always one row).
+-- DEPRECATED: replaced by gps_points + GET /api/track. Kept for reference.
 CREATE TABLE IF NOT EXISTS track_snapshots (
   id              INTEGER PRIMARY KEY DEFAULT 1,
   geojson         JSONB         NOT NULL,
@@ -14,6 +15,14 @@ CREATE TABLE IF NOT EXISTS track_snapshots (
   last_updated    TIMESTAMPTZ,
   created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   CONSTRAINT single_row CHECK (id = 1)
+);
+
+-- Individual GPS fixes. Append-only; never deleted. Full expedition history.
+CREATE TABLE IF NOT EXISTS gps_points (
+  id          SERIAL      PRIMARY KEY,
+  latitude    REAL        NOT NULL,
+  longitude   REAL        NOT NULL,
+  recorded_at TIMESTAMPTZ NOT NULL
 );
 
 -- Weather readings. One row per agent sync (4x daily).

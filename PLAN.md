@@ -124,6 +124,35 @@ graph LR
 | `SUPABASE_SERVICE_ROLE_KEY` | `.env` ✅ + Railway ⏳ | Server writes, bypasses RLS |
 | `REMOTE_SYNC_API_KEY` | `.env` ✅ + Railway ⏳ | Agent Bearer token |
 
+## Frontend — Data Wiring (Pending)
+
+These sections are currently rendering placeholder/hardcoded content and need to be wired to the DB:
+
+### Trajectory Map (`gps_points`)
+- **What**: Show all GPS points recorded during the full expedition as a continuous track line.
+- **Source**: `gps_points` table, ordered by `recorded_at ASC` — all rows, no date filter.
+- **Current map** (`ExpeditionMap.tsx`): hardcoded TRACK array → replace with data fetched server-side and passed as prop.
+
+### Map Header — Last Position (`gps_points` or `progress`)
+- **What**: LAT / LON display in the map panel header shows the last recorded position.
+- **Source**: `gps_points ORDER BY recorded_at DESC LIMIT 1`, or `progress.current_position` (JSONB `{lat, lon}`).
+- **Note**: ALT is not displayed (removed from UI).
+
+### Mission Log (`reflections` + `messages`)
+- **What**: Show only today's entries — the day's reflection and any messages sent today, merged and ordered chronologically.
+- **Source**:
+  - `reflections WHERE date = CURRENT_DATE` (one row max)
+  - `messages WHERE published_at::date = CURRENT_DATE ORDER BY published_at ASC`
+- **Current**: hardcoded `LOG_ENTRIES` array in `page.tsx`.
+
+### Photo Gallery — The Polar Prism (`photos`)
+- **What**: Show real photos uploaded by the agent, filtered by selected day tab.
+- **Source**: `photos WHERE recorded_at::date = <selected_date> ORDER BY significance_score DESC`.
+- **Day tabs**: derive available days from `SELECT DISTINCT recorded_at::date FROM photos ORDER BY 1 DESC LIMIT 4`.
+- **Current**: hardcoded `MOSAIC_PHOTOS` with picsum placeholders.
+
+---
+
 ## Commit History
 
 | #   | Description                                      | Status      |

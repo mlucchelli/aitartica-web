@@ -11,10 +11,10 @@ export function middleware(req: NextRequest) {
   }
 
   const writeKey = process.env.REMOTE_SYNC_API_KEY;
-  const readKey = process.env.REMOTE_READ_API_KEY;
+  const readKey  = process.env.REMOTE_READ_API_KEY;
 
-  if (!writeKey) {
-    console.error("REMOTE_SYNC_API_KEY is not set");
+  if (!writeKey || !readKey) {
+    console.error("REMOTE_SYNC_API_KEY or REMOTE_READ_API_KEY is not set");
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
 
@@ -24,7 +24,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!isWrite && token !== writeKey && token !== readKey) {
+  if (!isWrite && token !== readKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

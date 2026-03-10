@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
+export async function GET() {
+  const { data, error } = await supabase
+    .from("progress")
+    .select("*")
+    .eq("id", 1)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    console.error("[GET /api/progress]", error.message);
+    return NextResponse.json({ error: "Failed to fetch progress" }, { status: 500 });
+  }
+
+  return NextResponse.json(data ?? null);
+}
+
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
