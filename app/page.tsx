@@ -62,13 +62,28 @@ const MOSAIC_PHOTOS = [
 const MOSAIC_DAYS = ["Day 11", "Day 12", "Day 13", "Day 14"];
 
 export default async function Home() {
-  const { data: progress } = await supabase
-    .from("progress")
-    .select("expedition_day, distance_km_total, wildlife_spotted_total, temperature_min_all_time, tokens_used_total")
-    .eq("id", 1)
-    .single();
+  const [{ data: progress }, { data: gpsPoints }] = await Promise.all([
+    supabase
+      .from("progress")
+      .select("expedition_day, distance_km_total, wildlife_spotted_total, temperature_min_all_time, tokens_used_total")
+      .eq("id", 1)
+      .single(),
+    supabase
+      .from("gps_points")
+      .select("latitude, longitude")
+      .order("recorded_at", { ascending: true }),
+  ]);
 
   const rawTokens = progress?.tokens_used_total ?? 0;
+
+  const track = (gpsPoints ?? []).map(
+    (p): [number, number] => [p.latitude, p.longitude]
+  );
+  const lastPoint = gpsPoints?.at(-1) ?? null;
+
+  function fmtCoord(val: number, posDir: string, negDir: string) {
+    return `${Math.abs(val).toFixed(2)}° ${val >= 0 ? posDir : negDir}`;
+  }
 
   const stats: Stat[] = [
     { label: "Distance",    value: fmtDistance(progress?.distance_km_total ?? null),     unit: "KM",      live: true },
@@ -136,13 +151,15 @@ export default async function Home() {
               <div className="section-label">Live Telemetry</div>
               <div className="section-title map-panel-header__title">Trajectory Map</div>
             </div>
-            <div className="map-coords">
-              <div>LAT: <span>64.45° S</span></div>
-              <div>LON: <span>57.10° W</span></div>
-            </div>
+            {lastPoint && (
+              <div className="map-coords">
+                <div>LAT: <span>{fmtCoord(lastPoint.latitude, "N", "S")}</span></div>
+                <div>LON: <span>{fmtCoord(lastPoint.longitude, "E", "W")}</span></div>
+              </div>
+            )}
           </div>
           <div className="map-container-tall">
-            <MapWrapper />
+            <MapWrapper track={track} expeditionDay={progress?.expedition_day ?? null} />
             <div className="map-overlay">HEADING: 142° SE</div>
           </div>
         </div>

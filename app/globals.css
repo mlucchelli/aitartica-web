@@ -329,6 +329,18 @@ body {
 
 .map-coords span { color: var(--cyan); }
 
+.map-loading {
+  width: 100%; height: 100%;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+}
+
 .map-container-tall {
   position: relative;
   margin: 0 40px 40px;
