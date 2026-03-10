@@ -69,6 +69,7 @@ export default async function Home() {
     { data: gpsPoints },
     { data: todayReflection },
     { data: todayMessages },
+    { data: photos },
   ] = await Promise.all([
     supabase
       .from("progress")
@@ -90,6 +91,12 @@ export default async function Home() {
       .gte("published_at", `${today}T00:00:00Z`)
       .lt("published_at", `${today}T24:00:00Z`)
       .order("published_at", { ascending: false }),
+    supabase
+      .from("photos")
+      .select("id, file_url, vision_summary, agent_quote, recorded_at")
+      .order("significance_score", { ascending: false })
+      .order("recorded_at", { ascending: false })
+      .limit(20),
   ]);
 
   const rawTokens = progress?.tokens_used_total ?? 0;
@@ -112,6 +119,9 @@ export default async function Home() {
   ];
 
   const logEntries = liveLog.length > 0 ? liveLog : LOG_ENTRIES;
+
+  const livePhotos = photos ?? [];
+  const useLivePhotos = livePhotos.length > 0;
 
   const track = (gpsPoints ?? []).map(
     (p): [number, number] => [p.latitude, p.longitude]
@@ -249,17 +259,28 @@ export default async function Home() {
           </div>
         </div>
         <div className="mosaic-grid">
-          {MOSAIC_PHOTOS.map((photo) => (
-            <div key={photo.seed} className="mosaic-item">
-              <img
-                src={`https://picsum.photos/seed/${photo.seed}/800/600`}
-                alt={photo.label}
-                loading="lazy"
-              />
-              <div className="mosaic-item-overlay" />
-              <div className="mosaic-item-label">{photo.label}</div>
-            </div>
-          ))}
+          {useLivePhotos
+            ? livePhotos.map((photo) => (
+                <div key={photo.id} className="mosaic-item">
+                  <img src={photo.file_url} alt={photo.vision_summary ?? "Expedition photo"} loading="lazy" />
+                  <div className="mosaic-item-overlay" />
+                  {(photo.agent_quote ?? photo.vision_summary) && (
+                    <div className="mosaic-item-label">{photo.agent_quote ?? photo.vision_summary}</div>
+                  )}
+                </div>
+              ))
+            : MOSAIC_PHOTOS.map((photo) => (
+                <div key={photo.seed} className="mosaic-item">
+                  <img
+                    src={`https://picsum.photos/seed/${photo.seed}/800/600`}
+                    alt={photo.label}
+                    loading="lazy"
+                  />
+                  <div className="mosaic-item-overlay" />
+                  <div className="mosaic-item-label">{photo.label}</div>
+                </div>
+              ))
+          }
         </div>
       </section>
 
