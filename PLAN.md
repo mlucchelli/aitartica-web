@@ -158,7 +158,14 @@ graph LR
 | 10  | Wire map + LAT/LON to `gps_points`                            | ✅ Done     |
 | 11  | Wire Mission Log to today's `reflections` + `messages`        | ✅ Done     |
 | 12  | Wire Photo Gallery to `photos` from Supabase Storage          | ✅ Done     |
-| 13  | Railway deploy + env vars + end-to-end test                   | ⏳ Next     |
+| 13  | Wire remaining UI: stats photos, HEADING, reflection, day tabs | ✅ Done     |
+| 14  | Photo gallery lightbox + quote always visible                  | ✅ Done     |
+| 15  | UI polish: stats bar 6-col, nav hamburger mobile, map/log layout | ✅ Done   |
+| 16  | Railway deploy + env vars + end-to-end test                   | ⏳ Next     |
+
+## Key Dates
+
+- **Expedition start**: 2026-03-17 (Day 1). `expedition_day` in DB will be negative before this date — expected behavior.
 
 ## Next Step — Railway Deploy
 

@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
-import { fmtDistance, fmtTemp, fmtWildlife, fmtDay } from "@/lib/format";
+import { fmtDistance, fmtTemp, fmtWildlife, fmtTokens } from "@/lib/format";
 import MapWrapper from "./components/MapWrapper";
 import TokenCounter from "./components/TokenCounter";
+import PhotoGallery from "./components/PhotoGallery";
+import NavMenu from "./components/NavMenu";
 
 type Stat = {
   label: string;
@@ -46,23 +48,13 @@ const LOG_ENTRIES: LogEntry[] = [
   },
 ];
 
-const MOSAIC_PHOTOS = [
-  { seed: "ice1",   label: "Ice Formation · Sector 12" },
-  { seed: "snow2",  label: "Horizon Survey" },
-  { seed: "polar3", label: "Thermal Plume" },
-  { seed: "arct4",  label: "Crevasse Alpha" },
-  { seed: "cold5",  label: "Aurora · 02:17 UTC" },
-  { seed: "berg6",  label: "Emperor Colony" },
-  { seed: "wind7",  label: "Base Camp" },
-  { seed: "frost8", label: "Pressure Ridge" },
-  { seed: "ice9",   label: "Deep Survey" },
-  { seed: "snow10", label: "Transit Log" },
-];
-
-const MOSAIC_DAYS = ["Day 11", "Day 12", "Day 13", "Day 14"];
-
 export default async function Home() {
   const today = new Date().toISOString().slice(0, 10);
+  const EXPEDITION_START = "2026-03-17";
+  const expeditionDayCalc = Math.max(
+    0,
+    Math.floor((new Date(today).getTime() - new Date(EXPEDITION_START).getTime()) / 86400000) + 1
+  );
 
   const [
     { data: progress },
@@ -70,10 +62,11 @@ export default async function Home() {
     { data: todayReflection },
     { data: todayMessages },
     { data: photos },
+    { data: latestAnalysis },
   ] = await Promise.all([
     supabase
       .from("progress")
-      .select("expedition_day, distance_km_total, wildlife_spotted_total, temperature_min_all_time, tokens_used_total")
+      .select("expedition_day, distance_km_total, wildlife_spotted_total, temperature_min_all_time, tokens_used_total, photos_captured_total, published_at")
       .eq("id", 1)
       .single(),
     supabase
@@ -94,9 +87,14 @@ export default async function Home() {
     supabase
       .from("photos")
       .select("id, file_url, vision_summary, agent_quote, recorded_at")
-      .order("significance_score", { ascending: false })
       .order("recorded_at", { ascending: false })
-      .limit(20),
+      .limit(100),
+    supabase
+      .from("route_analyses")
+      .select("bearing_compass, bearing_deg")
+      .order("analyzed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const rawTokens = progress?.tokens_used_total ?? 0;
@@ -121,7 +119,6 @@ export default async function Home() {
   const logEntries = liveLog.length > 0 ? liveLog : LOG_ENTRIES;
 
   const livePhotos = photos ?? [];
-  const useLivePhotos = livePhotos.length > 0;
 
   const track = (gpsPoints ?? []).map(
     (p): [number, number] => [p.latitude, p.longitude]
@@ -132,11 +129,14 @@ export default async function Home() {
     return `${Math.abs(val).toFixed(2)}° ${val >= 0 ? posDir : negDir}`;
   }
 
+  const expeditionDayLabel = String(expeditionDayCalc);
+
   const stats: Stat[] = [
     { label: "Distance",    value: fmtDistance(progress?.distance_km_total ?? null),     unit: "KM",      live: true },
     { label: "Wildlife",    value: fmtWildlife(progress?.wildlife_spotted_total ?? null), unit: "Sightings" },
-    { label: "Temperature", value: fmtTemp(progress?.temperature_min_all_time ?? null),  unit: "Min" },
-    { label: "Expedition",  value: fmtDay(progress?.expedition_day ?? null),              unit: "Active" },
+    { label: "Min Temp",    value: fmtTemp(progress?.temperature_min_all_time ?? null),  unit: "°C" },
+    { label: "Expedition",  value: expeditionDayLabel,                                   unit: "Active" },
+    { label: "Processed",   value: fmtWildlife(progress?.photos_captured_total ?? null), unit: "Photos" },
     { label: "Tokens", node: rawTokens > 0 ? <TokenCounter target={rawTokens} /> : "—",  unit: "Used", live: true },
   ];
 
@@ -152,12 +152,9 @@ export default async function Home() {
           <li><a href="#expedition">Expedition</a></li>
           <li><a href="#live">Mission Log</a></li>
           <li><a href="#gallery">Photo Gallery</a></li>
-          <li><a href="#status" className="active">Core Status</a></li>
+          <li><a href="#status">Core Status</a></li>
         </ul>
-        <div className="nav-status">
-          <span className="nav-status-dot" />
-          NEURAL CORE ACTIVE
-        </div>
+        <NavMenu />
       </nav>
 
       {/* HERO */}
@@ -207,18 +204,17 @@ export default async function Home() {
           </div>
           <div className="map-container-tall">
             <MapWrapper track={track} expeditionDay={progress?.expedition_day ?? null} />
-            <div className="map-overlay">HEADING: 142° SE</div>
+            <div className="map-overlay">
+              {latestAnalysis
+                ? `HEADING: ${Math.round(latestAnalysis.bearing_deg ?? 0)}° ${latestAnalysis.bearing_compass ?? ""}`
+                : "HEADING: —"}
+            </div>
           </div>
         </div>
 
         <div className="log-panel" id="status">
-          <div className="section-label">Temporal Stream</div>
-          <h2 className="section-title">Mission Log</h2>
-  
-          <div className="log-status">
-            <span className="nav-status-dot" />
-            LOG STATUS: SYNCHRONIZING
-          </div>
+          <div className="section-label">Field Dispatches</div>
+          <h2 className="section-title log-panel__title">Mission Log</h2>
           <div className="log-entries log-entries-fill">
             {logEntries.map((entry) => (
               <div key={entry.time} className="log-entry">
@@ -249,59 +245,37 @@ export default async function Home() {
             <div className="section-label">Photo Gallery</div>
             <h2 className="section-title mosaic-header__title">The Polar Prism</h2>
           </div>
-          <div className="mosaic-tabs">
-            {MOSAIC_DAYS.map((d, i) => (
-              <button key={d} className={`mosaic-tab${i === MOSAIC_DAYS.length - 1 ? " active" : ""}`}>{d}</button>
-            ))}
-          </div>
         </div>
-        <div className="mosaic-grid">
-          {useLivePhotos
-            ? livePhotos.map((photo) => (
-                <div key={photo.id} className="mosaic-item">
-                  <img src={photo.file_url} alt={photo.vision_summary ?? "Expedition photo"} loading="lazy" />
-                  <div className="mosaic-item-overlay" />
-                  {(photo.agent_quote ?? photo.vision_summary) && (
-                    <div className="mosaic-item-label">{photo.agent_quote ?? photo.vision_summary}</div>
-                  )}
-                </div>
-              ))
-            : MOSAIC_PHOTOS.map((photo) => (
-                <div key={photo.seed} className="mosaic-item">
-                  <img
-                    src={`https://picsum.photos/seed/${photo.seed}/800/600`}
-                    alt={photo.label}
-                    loading="lazy"
-                  />
-                  <div className="mosaic-item-overlay" />
-                  <div className="mosaic-item-label">{photo.label}</div>
-                </div>
-              ))
-          }
-        </div>
+        <PhotoGallery photos={livePhotos} />
       </section>
 
       {/* DAILY REFLECTION */}
       <section className="reflection-section">
-        <div className="reflection-day">CORE REFLECTION // DAY 14</div>
+        <div className="reflection-day">
+          CORE REFLECTION {progress?.expedition_day != null ? `// DAY ${progress.expedition_day}` : ""}
+        </div>
         <div className="reflection-quote-mark">"</div>
         <p className="reflection-quote">
-          The silence here is not empty; it is a complex acoustic fabric. Data streams
-          indicate a 4.2% increase in sub-surface thermal activity. My synthesis suggests
-          we are approaching a historic threshold. The landscape is recalibrating, and so
-          am I. Our presence is no longer just observation — it is a dialogue with the deep freeze.
+          {todayReflection?.content ??
+            "The silence here is not empty; it is a complex acoustic fabric. Data streams indicate a 4.2% increase in sub-surface thermal activity. My synthesis suggests we are approaching a historic threshold. The landscape is recalibrating, and so am I. Our presence is no longer just observation — it is a dialogue with the deep freeze."}
         </p>
         <div className="reflection-meta">
-          <div>Field Position <span>82.86° S</span></div>
+          {lastPoint && (
+            <div>Field Position <span>{fmtCoord(lastPoint.latitude, "N", "S")}</span></div>
+          )}
           <div>Agent Model <span>Sonnet 4.6</span></div>
-          <div>Tokens Used <span>1.2M</span></div>
+          <div>Tokens Used <span>{fmtTokens(rawTokens > 0 ? rawTokens : null)}</span></div>
         </div>
       </section>
 
       {/* FOOTER */}
       <footer className="footer">
-        <div className="footer-text">© 2026 ANTARTIA EXPEDITION — AI-LEAD EXPLORATION</div>
-        <div className="footer-text">LAST SYNC: 06:02:44 UTC</div>
+        <div className="footer-text">© 2026 AITARTICA EXPEDITION — AI-LEAD EXPLORATION</div>
+        <div className="footer-text">
+          {progress?.published_at
+            ? `LAST SYNC: ${new Date(progress.published_at).toUTCString().slice(17, 25)} UTC`
+            : "LAST SYNC: —"}
+        </div>
         <a href="#expedition" className="footer-up">↑</a>
       </footer>
     </>
