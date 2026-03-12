@@ -898,6 +898,16 @@ body {
   color: var(--cyan);
 }
 
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: var(--cyan);
+}
+
 /* ─── MOBILE RESPONSIVE ─── */
 @media (max-width: 768px) {
   .nav { padding: 0 16px; }

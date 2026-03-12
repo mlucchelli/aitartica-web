@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "#live",       label: "Mission Log" },
   { href: "#gallery",    label: "Photo Gallery" },
   { href: "#status",     label: "Core Status" },
+  { href: "/about",      label: "About" },
 ];
 
 export default function NavMenu() {
