@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
+import { tweetText } from "@/lib/twitter";
 
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
@@ -28,5 +29,6 @@ export async function POST(req: NextRequest) {
   }
 
   revalidatePath("/");
+  tweetText(`${body.content}\n\n#AITARTICA #Antarctica`);
   return NextResponse.json({ ok: true });
 }

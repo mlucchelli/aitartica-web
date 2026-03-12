@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
+import { tweetPhoto, tweetText } from "@/lib/twitter";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -63,5 +64,11 @@ export async function POST(req: NextRequest) {
   }
 
   revalidatePath("/");
+  const tweetCaption = (metadata.agent_quote as string) ?? (metadata.vision_summary as string);
+  if (tweetCaption) {
+    tweetPhoto(`${tweetCaption}\n\n#AITARTICA #Antarctica`, urlData.publicUrl);
+  } else {
+    tweetText(`New photo from the ice.\n\n#AITARTICA #Antarctica`);
+  }
   return NextResponse.json({ ok: true, file_url: urlData.publicUrl });
 }
