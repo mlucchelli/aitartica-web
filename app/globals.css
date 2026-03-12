@@ -923,12 +923,13 @@ body {
   .section { padding: 48px 20px; }
   .section-title { font-size: 20px; }
 
-  .map-log-section { grid-template-columns: 1fr; }
+  .map-log-section { grid-template-columns: 1fr; height: auto; }
   .map-panel { border-right: none; border-bottom: 1px solid var(--border); }
   .map-panel-header { padding: 32px 20px 16px; flex-direction: column; gap: 12px; }
   .map-coords { text-align: left; }
-  .map-container-tall { margin: 0 20px 32px; height: 320px; }
-  .log-panel { padding: 32px 20px; }
+  .map-container-tall { margin: 0 20px 32px; height: 80svh; }
+  .log-panel { padding: 32px 20px; overflow: visible; height: auto; }
+  .log-entries-fill { flex: none; overflow-y: visible; max-height: none; }
 
   .map-header { padding: 32px 20px 16px; flex-direction: column; gap: 12px; }
   .map-container { margin: 0 20px 32px; height: 280px; }
@@ -959,5 +960,11 @@ body {
 @media (max-width: 480px) {
   .nav-logo span { display: none; }
   .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  /* Reset 3-col rules and apply 2-col border logic */
+  .stats-item { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stats-item:nth-child(3n) { border-right: 1px solid var(--border); }
+  .stats-item:nth-last-child(-n+3) { border-bottom: 1px solid var(--border); }
+  .stats-item:nth-child(even) { border-right: none; }
+  .stats-item:nth-last-child(-n+2) { border-bottom: none; }
   .hero-title { font-size: 38px; letter-spacing: 0.08em; }
 }

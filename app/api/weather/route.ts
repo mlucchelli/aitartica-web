@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
@@ -35,5 +36,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save weather snapshot" }, { status: 500 });
   }
 
+  revalidatePath("/");
   return NextResponse.json({ ok: true });
 }

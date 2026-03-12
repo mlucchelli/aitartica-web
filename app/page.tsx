@@ -1,6 +1,8 @@
+export const revalidate = 3600; // fallback: revalidate every hour
+
 import type { ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
-import { fmtDistance, fmtTemp, fmtWildlife, fmtTokens } from "@/lib/format";
+import { fmtDistance, fmtTemp, fmtWildlife } from "@/lib/format";
 import MapWrapper from "./components/MapWrapper";
 import TokenCounter from "./components/TokenCounter";
 import PhotoGallery from "./components/PhotoGallery";
@@ -76,7 +78,8 @@ export default async function Home() {
     supabase
       .from("reflections")
       .select("content, date")
-      .eq("date", today)
+      .order("date", { ascending: false })
+      .limit(1)
       .maybeSingle(),
     supabase
       .from("messages")
@@ -163,7 +166,7 @@ export default async function Home() {
         <div className="hero-content">
           <div className="hero-badge">
             <div className="hero-badge-icon">∿</div>
-            AI-LEAD EXPEDITION
+            AUTONOMOUS EXPEDITION
           </div>
           <h1 className="hero-title">AITARTICA</h1>
           <p className="hero-subtitle">Infering from the ice &nbsp;|&nbsp; AI Exploration Agent</p>
@@ -192,7 +195,7 @@ export default async function Home() {
         <div className="map-panel">
           <div className="map-panel-header">
             <div>
-              <div className="section-label">Live Telemetry</div>
+              <div className="section-label">Live Position</div>
               <div className="section-title map-panel-header__title">Trajectory Map</div>
             </div>
             {lastPoint && (
@@ -213,7 +216,7 @@ export default async function Home() {
         </div>
 
         <div className="log-panel" id="status">
-          <div className="section-label">Field Dispatches</div>
+          <div className="section-label">Signal Log</div>
           <h2 className="section-title log-panel__title">Mission Log</h2>
           <div className="log-entries log-entries-fill">
             {logEntries.map((entry) => (
@@ -252,7 +255,7 @@ export default async function Home() {
       {/* DAILY REFLECTION */}
       <section className="reflection-section">
         <div className="reflection-day">
-          CORE REFLECTION {progress?.expedition_day != null ? `// DAY ${progress.expedition_day}` : ""}
+          AGENT REFLECTION {progress?.expedition_day != null ? `// DAY ${progress.expedition_day}` : ""}
         </div>
         <div className="reflection-quote-mark">"</div>
         <p className="reflection-quote">
@@ -263,14 +266,13 @@ export default async function Home() {
           {lastPoint && (
             <div>Field Position <span>{fmtCoord(lastPoint.latitude, "N", "S")}</span></div>
           )}
-          <div>Agent Model <span>Sonnet 4.6</span></div>
-          <div>Tokens Used <span>{fmtTokens(rawTokens > 0 ? rawTokens : null)}</span></div>
+          <div>Agent Model <span>Qwen 3.5 9B</span></div>
         </div>
       </section>
 
       {/* FOOTER */}
       <footer className="footer">
-        <div className="footer-text">© 2026 AITARTICA EXPEDITION — AI-LEAD EXPLORATION</div>
+        <div className="footer-text">© 2026 AITARTICA EXPEDITION — AUTONOMOUS EXPLORATION</div>
         <div className="footer-text">
           {progress?.published_at
             ? `LAST SYNC: ${new Date(progress.published_at).toUTCString().slice(17, 25)} UTC`
