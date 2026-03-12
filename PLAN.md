@@ -167,13 +167,76 @@ graph LR
 
 - **Expedition start**: 2026-03-17 (Day 1). `expedition_day` in DB will be negative before this date — expected behavior.
 
-## Next Step — Railway Deploy
+## Railway Deploy
 
-1. Connect GitHub repo to Railway service
-2. Set env vars in Railway dashboard:
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `REMOTE_SYNC_API_KEY`
-   - `REMOTE_READ_API_KEY`
-3. Verify live deploy — hit `/` and confirm page loads
-4. End-to-end test: agent POST to `/api/progress`, `/api/location`, reload page, confirm stats update
+✅ Live at `https://aitartica.com` — SSL via Let's Encrypt, auto-deploy from `main`.
+
+---
+
+## Twitter / X Integration
+
+### Goal
+Auto-tweet from the expedition's X account every time the agent posts a **message** or a **photo**. Photos include the `agent_quote` if available.
+
+### Auth model — OAuth 1.0a (user context)
+The Bearer Token only allows read-only access. To post tweets as the agent's account we need OAuth 1.0a credentials:
+
+| Credential | Env var | Status |
+|---|---|---|
+| Consumer Key | `TWITTER_CONSUMER_KEY` | ✅ Set |
+| Consumer Secret | `TWITTER_CONSUMER_SECRET` | ✅ Set |
+| Bearer Token | `TWITTER_BEARER_TOKEN` | ✅ Set |
+| Access Token | `TWITTER_ACCESS_TOKEN` | ⏳ Pending OAuth flow |
+| Access Token Secret | `TWITTER_ACCESS_TOKEN_SECRET` | ⏳ Pending OAuth flow |
+
+### One-time OAuth setup (get Access Token + Secret)
+1. In Twitter Developer Portal → App → "Keys and Tokens" → generate **Access Token & Secret** for the agent's account (must be logged in as that account)
+2. Add `TWITTER_ACCESS_TOKEN` and `TWITTER_ACCESS_TOKEN_SECRET` to `.env` and Railway
+3. Verify with a test tweet
+
+> **Note:** The app must have **Read and Write** permissions in the Developer Portal (not Read-only). Check under App Settings → User authentication settings.
+
+### Tweet triggers
+
+| Trigger | Endpoint | Tweet format |
+|---|---|---|
+| New message | `POST /api/messages` | `{content}` (truncated to 280 chars) |
+| New photo | `POST /api/photos` | `{agent_quote ?? vision_summary}` + photo attached via media upload |
+
+### Implementation plan
+
+```
+lib/twitter.ts              # Twitter client — OAuth1 signing + tweet/uploadMedia helpers
+app/api/messages/route.ts   # After DB insert → sendTweet(content)
+app/api/photos/route.ts     # After Storage upload → uploadMedia(jpeg) → sendTweetWithMedia(quote, mediaId)
+```
+
+#### `lib/twitter.ts`
+- Use `twitter-api-v2` npm package (handles OAuth 1.0a signing)
+- Export `tweetText(text: string)` and `tweetPhoto(text: string, imageUrl: string)`
+- Guard: if `TWITTER_ACCESS_TOKEN` is not set, skip silently (so local dev doesn't fail)
+- Tweet failures must NOT fail the API response — wrap in try/catch, log error only
+
+#### Tweet format examples
+```
+// Message
+"The wind hasn't stopped for 48 hours. The AI suggests we move to sector 4,
+but the visuals are completely white. #AITARTICA #Antarctica"
+
+// Photo
+"TWO SOULS, ONE OCEAN. 🐋
+📍 64.1°S · Day -6 · #AITARTICA"
+[attached: photo JPEG]
+```
+
+### Env vars to add to Railway after OAuth flow
+```
+TWITTER_ACCESS_TOKEN=<from developer portal>
+TWITTER_ACCESS_TOKEN_SECRET=<from developer portal>
+```
+
+### Next steps
+1. ⏳ Generate Access Token + Secret in Twitter Developer Portal (agent account)
+2. ⏳ Implement `lib/twitter.ts` with `twitter-api-v2`
+3. ⏳ Wire into `/api/messages` and `/api/photos`
+4. ⏳ End-to-end test: POST message → confirm tweet appears on agent's timeline
