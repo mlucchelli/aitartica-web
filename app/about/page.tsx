@@ -21,8 +21,8 @@ const AI_LOGOS = [
     height: 32,
   },
   {
-    name: "Qwen",
-    url: "https://qianwen-res.oss-cn-beijing.aliyuncs.com/logo/qwen.png",
+    name: "Aoki",
+    url: "https://www.aokitech.com.ar/aoki-logo.png",
     width: 100,
     height: 32,
   },
@@ -154,6 +154,22 @@ export default function About() {
                 <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: "0.15em", color: "var(--text-muted)", textTransform: "uppercase" }}>{logo.name}</span>
               </div>
             ))}
+            {/* Qwen — no reliable public logo CDN, use styled text */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+              <div style={{
+                height: 32,
+                display: "flex",
+                alignItems: "center",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 22,
+                fontWeight: 700,
+                letterSpacing: "0.05em",
+                color: "rgba(255,255,255,0.2)",
+              }}>
+                QWEN
+              </div>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: "0.15em", color: "var(--text-muted)", textTransform: "uppercase" }}>Qwen</span>
+            </div>
           </div>
         </div>
       </section>
