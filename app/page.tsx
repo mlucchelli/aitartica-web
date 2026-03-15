@@ -1,4 +1,4 @@
-export const revalidate = 3600; // fallback: revalidate every hour
+export const revalidate = 600; // fallback: revalidate every hour
 
 import type { ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
