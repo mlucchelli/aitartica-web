@@ -27,10 +27,7 @@ type LogEntry = {
 export default async function Home() {
   const today = new Date().toISOString().slice(0, 10);
   const EXPEDITION_START = "2026-03-17";
-  const expeditionDayCalc = Math.max(
-    0,
-    Math.floor((new Date(today).getTime() - new Date(EXPEDITION_START).getTime()) / 86400000) + 1
-  );
+  const expeditionDayCalc = Math.floor((new Date(today).getTime() - new Date(EXPEDITION_START).getTime()) / 86400000);
 
   const [
     { data: progress },
@@ -112,7 +109,7 @@ export default async function Home() {
     { label: "Distance",    value: fmtDistance(progress?.distance_km_total ?? null),     unit: "KM",      live: true },
     { label: "Wildlife",    value: fmtWildlife(progress?.wildlife_spotted_total ?? null), unit: "Sightings" },
     { label: "Min Temp",    value: fmtTemp(progress?.temperature_min_all_time ?? null),  unit: "°C" },
-    { label: "Expedition",  value: expeditionDayLabel,                                   unit: "Active" },
+    { label: "Expedition",  value: expeditionDayCalc > 0 ? expeditionDayLabel : "—",     unit: "Active" },
     { label: "Processed",   value: fmtWildlife(progress?.photos_captured_total ?? null), unit: "Photos" },
     { label: "Tokens", node: rawTokens > 0 ? <TokenCounter target={rawTokens} /> : "—",  unit: "Used", live: true },
   ];
@@ -181,7 +178,7 @@ export default async function Home() {
             )}
           </div>
           <div className="map-container-tall">
-            <MapWrapper track={track} expeditionDay={progress?.expedition_day ?? null} />
+            <MapWrapper track={track} expeditionDay={progress?.expedition_day ?? expeditionDayCalc} />
             <div className="map-overlay">
               {latestAnalysis
                 ? `HEADING: ${Math.round(latestAnalysis.bearing_deg ?? 0)}° ${latestAnalysis.bearing_compass ?? ""}`
