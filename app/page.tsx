@@ -24,32 +24,6 @@ type LogEntry = {
   meta?: { label: string; value: string }[];
 };
 
-const LOG_ENTRIES: LogEntry[] = [
-  {
-    tag: "reflection", tagClass: "log-tag-reflection", time: "06:02:44 UTC",
-    text: "Initializing deep-crust acoustic mapping. The resonance patterns suggest a hollow structure at −240m. Re-calibrating sonar array to compensate for thermal interference.",
-  },
-  {
-    tag: "message", tagClass: "log-tag-message", time: "05:11:29 UTC",
-    text: '"The wind hasn\'t stopped for 48 hours. The AI suggests we move to sector 4, but the visuals are completely white. Waiting for telemetry confirmation."',
-    meta: [{ label: "TEMP", value: "−38°C" }, { label: "WIND", value: "74 km/h NW" }],
-  },
-  {
-    tag: "route analysis", tagClass: "log-tag-route", time: "04:08:37 UTC",
-    text: "Optimal path recalculated. Avoiding unstable ice shelf in Sector 11. ETA to Delta Point delayed 180 minutes.",
-    meta: [{ label: "RISK", value: "MINIMAL" }, { label: "CONFIDENCE", value: "92%" }],
-  },
-  {
-    tag: "reflection", tagClass: "log-tag-reflection", time: "00:00:01 UTC",
-    text: "Day 14 commencement. All systems nominal. The quiet is becoming a variable in my predictive models — an outlier I cannot yet quantify.",
-  },
-  {
-    tag: "message", tagClass: "log-tag-message", time: "23:54:12 UTC",
-    text: "First visual of Emperor penguin colony at 82.4°S. Estimating 2,400 individuals. Documenting for behavioral archive.",
-    meta: [{ label: "LAT", value: "82.4° S" }, { label: "SPECIMENS", value: "≈2,400" }],
-  },
-];
-
 export default async function Home() {
   const today = new Date().toISOString().slice(0, 10);
   const EXPEDITION_START = "2026-03-17";
@@ -119,7 +93,7 @@ export default async function Home() {
     })),
   ];
 
-  const logEntries = liveLog.length > 0 ? liveLog : LOG_ENTRIES;
+  const logEntries = liveLog;
 
   const livePhotos = photos ?? [];
 
@@ -220,7 +194,7 @@ export default async function Home() {
           <div className="section-label">Signal Log</div>
           <h2 className="section-title log-panel__title">Mission Log</h2>
           <div className="log-entries log-entries-fill">
-            {logEntries.map((entry) => (
+            {logEntries.length > 0 ? logEntries.map((entry) => (
               <div key={entry.time} className="log-entry">
                 <div className="log-entry-header">
                   <span className={`log-tag ${entry.tagClass}`}>{entry.tag}</span>
@@ -237,7 +211,11 @@ export default async function Home() {
                   </div>
                 )}
               </div>
-            ))}
+            )) : (
+              <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.12em", color: "var(--text-muted)", padding: "48px 0" }}>
+                NO TRANSMISSIONS TODAY
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -260,8 +238,7 @@ export default async function Home() {
         </div>
         <div className="reflection-quote-mark">"</div>
         <p className="reflection-quote">
-          {todayReflection?.content ??
-            "The silence here is not empty; it is a complex acoustic fabric. Data streams indicate a 4.2% increase in sub-surface thermal activity. My synthesis suggests we are approaching a historic threshold. The landscape is recalibrating, and so am I. Our presence is no longer just observation — it is a dialogue with the deep freeze."}
+          {todayReflection?.content ?? "—"}
         </p>
         <div className="reflection-meta">
           {lastPoint && (
