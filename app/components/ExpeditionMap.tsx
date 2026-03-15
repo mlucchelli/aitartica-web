@@ -11,19 +11,6 @@ interface Props {
   expeditionDay: number | null;
 }
 
-// Fallback track shown when no GPS data is available yet
-const FALLBACK_TRACK: LatLon[] = [
-  [-62.05, -58.40],
-  [-62.42, -58.15],
-  [-62.80, -57.85],
-  [-63.18, -57.40],
-  [-63.52, -56.88],
-  [-63.76, -57.10],
-  [-63.90, -57.32],
-  [-64.12, -57.65],
-  [-64.28, -56.72],
-  [-64.45, -57.10],
-];
 
 function getBounds(track: LatLon[]): { center: LatLon; zoom: number } {
   if (track.length === 0) return { center: [-63.3, -57.5], zoom: 6 };
@@ -52,11 +39,10 @@ export default function ExpeditionMap({ track, expeditionDay }: Props) {
     });
   }, []);
 
-  const activeTrack = track.length >= 2 ? track : FALLBACK_TRACK;
-  const { center, zoom } = useMemo(() => getBounds(activeTrack), [activeTrack]);
-  const start = activeTrack[0];
-  const current = activeTrack[activeTrack.length - 1];
-  const isLive = track.length >= 2;
+  const { center, zoom } = useMemo(() => getBounds(track), [track]);
+  const start = track[0];
+  const current = track[track.length - 1];
+  const isLive = track.length > 0;
 
   return (
     <MapContainer
@@ -71,8 +57,8 @@ export default function ExpeditionMap({ track, expeditionDay }: Props) {
         attribution='© <a href="https://carto.com/">CARTO</a> © <a href="https://www.openstreetmap.org/copyright">OSM</a>'
       />
 
-      <Polyline positions={activeTrack} pathOptions={{ color: "#0099b3", weight: 2.5, opacity: isLive ? 0.85 : 0.4 }} />
-      <Polyline positions={activeTrack} pathOptions={{ color: "#0099b3", weight: 8, opacity: isLive ? 0.12 : 0.06 }} />
+      {track.length >= 2 && <Polyline positions={track} pathOptions={{ color: "#0099b3", weight: 2.5, opacity: 0.85 }} />}
+      {track.length >= 2 && <Polyline positions={track} pathOptions={{ color: "#0099b3", weight: 8, opacity: 0.12 }} />}
 
       {start && (
         <CircleMarker
@@ -86,16 +72,14 @@ export default function ExpeditionMap({ track, expeditionDay }: Props) {
         </CircleMarker>
       )}
 
-      {current && current !== start && (
+      {current && (
         <CircleMarker
           center={current}
           radius={7}
-          pathOptions={{ color: "#0099b3", fillColor: "#0099b3", fillOpacity: isLive ? 1 : 0.3, weight: 2 }}
+          pathOptions={{ color: "#0099b3", fillColor: "#0099b3", fillOpacity: 1, weight: 2 }}
         >
           <Tooltip permanent direction="top" offset={[0, -10]} className="map-tooltip">
-            {isLive
-              ? `${expeditionDay != null ? `Day ${expeditionDay}` : "Current"} · ${Math.abs(current[0]).toFixed(2)}°S`
-              : "Awaiting signal..."}
+            {`${expeditionDay != null ? `Day ${expeditionDay}` : "Current"} · ${Math.abs(current[0]).toFixed(2)}°S`}
           </Tooltip>
         </CircleMarker>
       )}

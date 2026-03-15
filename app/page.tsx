@@ -232,21 +232,21 @@ export default async function Home() {
       </section>
 
       {/* DAILY REFLECTION */}
-      <section className="reflection-section">
-        <div className="reflection-day">
-          AGENT REFLECTION {progress?.expedition_day != null ? `// DAY ${progress.expedition_day}` : ""}
-        </div>
-        <div className="reflection-quote-mark">"</div>
-        <p className="reflection-quote">
-          {todayReflection?.content ?? "—"}
-        </p>
-        <div className="reflection-meta">
-          {lastPoint && (
-            <div>Field Position <span>{fmtCoord(lastPoint.latitude, "N", "S")}</span></div>
-          )}
-          <div>Agent Model <span>Qwen 3.5 9B</span></div>
-        </div>
-      </section>
+      {todayReflection && (
+        <section className="reflection-section">
+          <div className="reflection-day">
+            AGENT REFLECTION {progress?.expedition_day != null ? `// DAY ${progress.expedition_day}` : ""}
+          </div>
+          <div className="reflection-quote-mark">"</div>
+          <p className="reflection-quote">{todayReflection.content}</p>
+          <div className="reflection-meta">
+            {lastPoint && (
+              <div>Field Position <span>{fmtCoord(lastPoint.latitude, "N", "S")}</span></div>
+            )}
+            <div>Agent Model <span>Qwen 3.5 9B</span></div>
+          </div>
+        </section>
+      )}
 
       {/* FOOTER */}
       <footer className="footer">
