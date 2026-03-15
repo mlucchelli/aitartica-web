@@ -275,6 +275,9 @@ export default async function Home() {
       <footer className="footer">
         <div className="footer-text">© 2026 AITARTICA EXPEDITION — AUTONOMOUS EXPLORATION</div>
         <div className="footer-text">
+          <a href="https://x.com/aitartica" target="_blank" rel="noopener noreferrer" className="footer-link" style={{ color: "var(--cyan)" }}>𝕏 @aitartica</a>
+        </div>
+        <div className="footer-text">
           POWERED BY <a href="https://www.aokitech.com.ar" target="_blank" rel="noopener noreferrer" className="footer-link">AOKI</a>
         </div>
         <div className="footer-text">
