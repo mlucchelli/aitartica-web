@@ -10,20 +10,6 @@ type Photo = {
   recorded_at: string | null;
 };
 
-const FALLBACK_PHOTOS = [
-  { seed: "ice1",   label: "Ice Formation · Sector 12" },
-  { seed: "snow2",  label: "Horizon Survey" },
-  { seed: "polar3", label: "Thermal Plume" },
-  { seed: "arct4",  label: "Crevasse Alpha" },
-  { seed: "cold5",  label: "Aurora · 02:17 UTC" },
-  { seed: "berg6",  label: "Emperor Colony" },
-  { seed: "wind7",  label: "Base Camp" },
-  { seed: "frost8", label: "Pressure Ridge" },
-  { seed: "ice9",   label: "Deep Survey" },
-  { seed: "snow10", label: "Transit Log" },
-];
-
-const FALLBACK_DAYS = ["Day 11", "Day 12", "Day 13", "Day 14"];
 
 function fmtShortDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00Z");
@@ -126,22 +112,15 @@ export default function PhotoGallery({ photos }: { photos: Photo[] }) {
 
   if (!grouped) {
     return (
-      <>
-        <div className="mosaic-tabs">
-          {FALLBACK_DAYS.map((d, i) => (
-            <button key={d} className={`mosaic-tab${i === FALLBACK_DAYS.length - 1 ? " active" : ""}`}>{d}</button>
-          ))}
-        </div>
-        <div className="mosaic-grid">
-          {FALLBACK_PHOTOS.map((photo) => (
-            <div key={photo.seed} className="mosaic-item">
-              <img src={`https://picsum.photos/seed/${photo.seed}/800/600`} alt={photo.label} loading="lazy" />
-              <div className="mosaic-item-overlay" />
-              <div className="mosaic-item-label">{photo.label}</div>
-            </div>
-          ))}
-        </div>
-      </>
+      <p style={{
+        fontFamily: "'Space Mono', monospace",
+        fontSize: 11,
+        letterSpacing: "0.12em",
+        color: "var(--text-muted)",
+        padding: "48px 0",
+      }}>
+        NO PHOTOS TRANSMITTED YET
+      </p>
     );
   }
 
