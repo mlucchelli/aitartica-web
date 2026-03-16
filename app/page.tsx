@@ -103,7 +103,6 @@ export default async function Home() {
           <li><a href="#expedition">Expedition</a></li>
           <li><a href="#live">Mission Log</a></li>
           <li><a href="#gallery">Photo Gallery</a></li>
-          <li><a href="#status">Core Status</a></li>
           <li><a href="/about">About</a></li>
         </ul>
         <NavMenu />
@@ -207,6 +206,7 @@ export default async function Home() {
         </div>
         <div className="footer-text">
           POWERED BY <a href="https://www.aokitech.com.ar" target="_blank" rel="noopener noreferrer" className="footer-link">AOKI</a>
+          {" · "}<a href="https://www.linkedin.com/in/nosoul" target="_blank" rel="noopener noreferrer" className="footer-link">nosoul</a>
         </div>
         <div className="footer-text">
           {progress?.published_at

@@ -65,6 +65,7 @@ body {
   font-size: 11px;
   letter-spacing: 0.2em;
   color: var(--navy);
+  text-decoration: none;
 }
 
 .nav-logo-icon {
