@@ -77,7 +77,9 @@ function Lightbox({
   );
 }
 
-export default function PhotoGallery({ photos }: { photos: Photo[] }) {
+const ALL_TAB = "__all__";
+
+export default function PhotoGallery({ photos, today }: { photos: Photo[]; today: string }) {
   const grouped = useMemo(() => {
     if (photos.length === 0) return null;
 
@@ -97,13 +99,25 @@ export default function PhotoGallery({ photos }: { photos: Photo[] }) {
       days.push({ date: "unknown", label: "Unknown" });
     }
 
+    // ALL tab: all photos sorted by recorded_at descending
+    byDate[ALL_TAB] = [...photos].sort((a, b) =>
+      (b.recorded_at ?? "").localeCompare(a.recorded_at ?? "")
+    );
+
     return { byDate, days };
   }, [photos]);
+
+  // Default to today (Argentina date) if it has photos, else most recent day
+  const defaultDay = useMemo(() => {
+    if (!grouped) return null;
+    if (grouped.byDate[today]?.length) return today;
+    return grouped.days.at(-1)?.date ?? null;
+  }, [grouped, today]);
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const activeDay = selectedDay ?? grouped?.days.at(-1)?.date ?? null;
+  const activeDay = selectedDay ?? defaultDay;
   const visiblePhotos = activeDay && grouped ? (grouped.byDate[activeDay] ?? []) : [];
 
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
@@ -136,6 +150,12 @@ export default function PhotoGallery({ photos }: { photos: Photo[] }) {
             {d.label}
           </button>
         ))}
+        <button
+          className={`mosaic-tab${activeDay === ALL_TAB ? " active" : ""}`}
+          onClick={() => { setSelectedDay(ALL_TAB); setLightboxIndex(null); }}
+        >
+          ALL
+        </button>
       </div>
       <div className="mosaic-grid">
         {visiblePhotos.map((photo, i) => (

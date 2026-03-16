@@ -231,7 +231,7 @@ export default async function Home() {
             <h2 className="section-title mosaic-header__title">The Polar Prism</h2>
           </div>
         </div>
-        <PhotoGallery photos={livePhotos} />
+        <PhotoGallery photos={livePhotos} today={today} />
       </section>
 
       {/* DAILY REFLECTION */}
