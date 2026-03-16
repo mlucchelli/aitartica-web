@@ -25,7 +25,13 @@ type LogEntry = {
 };
 
 export default async function Home() {
-  const today = new Date().toISOString().slice(0, 10);
+  // "Today" anchored to Argentina time (UTC-3)
+  const todayAR = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const today = todayAR;
+  // UTC window for Argentina's calendar day: midnight ART = 03:00 UTC
+  const dayStartUTC = `${todayAR}T03:00:00Z`;
+  const tomorrowAR = new Date(new Date(todayAR + "T03:00:00Z").getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const dayEndUTC = `${tomorrowAR}T03:00:00Z`;
   const EXPEDITION_START = "2026-03-17";
   const expeditionDayCalc = Math.floor((new Date(today).getTime() - new Date(EXPEDITION_START).getTime()) / 86400000);
 
@@ -55,8 +61,8 @@ export default async function Home() {
     supabase
       .from("messages")
       .select("content, published_at")
-      .gte("published_at", `${today}T00:00:00Z`)
-      .lt("published_at", `${today}T24:00:00Z`)
+      .gte("published_at", dayStartUTC)
+      .lt("published_at", dayEndUTC)
       .order("published_at", { ascending: false }),
     supabase
       .from("photos")
