@@ -156,11 +156,11 @@ export default async function Home() {
           </div>
           <div className="map-container-tall">
             <MapWrapper track={track} expeditionDay={progress?.expedition_day ?? expeditionDayCalc} />
-            <div className="map-overlay">
-              {latestAnalysis
-                ? `HEADING: ${Math.round(latestAnalysis.bearing_deg ?? 0)}° ${latestAnalysis.bearing_compass ?? ""}`
-                : "HEADING: —"}
-            </div>
+            {latestAnalysis && (
+              <div className="map-overlay">
+                {`HEADING: ${Math.round(latestAnalysis.bearing_deg ?? 0)}° ${latestAnalysis.bearing_compass ?? ""}`}
+              </div>
+            )}
           </div>
         </div>
 
