@@ -6,6 +6,7 @@ import { fmtDistance, fmtTemp, fmtWildlife } from "@/lib/format";
 import MapWrapper from "./components/MapWrapper";
 import TokenCounter from "./components/TokenCounter";
 import PhotoGallery from "./components/PhotoGallery";
+import MissionLog from "./components/MissionLog";
 import NavMenu from "./components/NavMenu";
 
 type Stat = {
@@ -16,22 +17,12 @@ type Stat = {
   node?: ReactNode;
 };
 
-type LogEntry = {
-  tag: string;
-  tagClass: string;
-  time: string;
-  text: string;
-  meta?: { label: string; value: string }[];
-};
 
 export default async function Home() {
   // "Today" anchored to Argentina time (UTC-3)
   const todayAR = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const today = todayAR;
   // UTC window for Argentina's calendar day: midnight ART = 03:00 UTC
-  const dayStartUTC = `${todayAR}T03:00:00Z`;
-  const tomorrowAR = new Date(new Date(todayAR + "T03:00:00Z").getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const dayEndUTC = `${tomorrowAR}T03:00:00Z`;
   const EXPEDITION_START = "2026-03-17";
   const expeditionDayCalc = Math.floor((new Date(today).getTime() - new Date(EXPEDITION_START).getTime()) / 86400000);
 
@@ -61,8 +52,7 @@ export default async function Home() {
     supabase
       .from("messages")
       .select("content, published_at")
-      .gte("published_at", dayStartUTC)
-      .lt("published_at", dayEndUTC)
+      .gte("published_at", new Date(Date.now() - 3 * 60 * 60 * 1000 - 11 * 24 * 60 * 60 * 1000).toISOString())
       .order("published_at", { ascending: false }),
     supabase
       .from("photos")
@@ -78,25 +68,6 @@ export default async function Home() {
   ]);
 
   const rawTokens = progress?.tokens_used_total ?? 0;
-
-  const liveLog: LogEntry[] = [
-    ...(todayReflection
-      ? [{
-          tag: "reflection",
-          tagClass: "log-tag-reflection",
-          time: new Date(todayReflection.date).toISOString().slice(11, 19) + " UTC",
-          text: todayReflection.content,
-        }]
-      : []),
-    ...(todayMessages ?? []).map((m) => ({
-      tag: "message",
-      tagClass: "log-tag-message",
-      time: new Date(m.published_at).toUTCString().slice(17, 25) + " UTC",
-      text: m.content,
-    })),
-  ];
-
-  const logEntries = liveLog;
 
   const livePhotos = photos ?? [];
 
@@ -193,34 +164,11 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="log-panel" id="status">
-          <div className="section-label">Signal Log</div>
-          <h2 className="section-title log-panel__title">Mission Log</h2>
-          <div className="log-entries log-entries-fill">
-            {logEntries.length > 0 ? logEntries.map((entry) => (
-              <div key={entry.time} className="log-entry">
-                <div className="log-entry-header">
-                  <span className={`log-tag ${entry.tagClass}`}>{entry.tag}</span>
-                  <span className="log-time">{entry.time}</span>
-                </div>
-                <p className="log-text">{entry.text}</p>
-                {entry.meta && (
-                  <div className="log-meta">
-                    {entry.meta.map((m) => (
-                      <div key={m.label} className="log-meta-item">
-                        {m.label}<span className="log-meta-value">{m.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )) : (
-              <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.12em", color: "var(--text-muted)", padding: "48px 0" }}>
-                NO TRANSMISSIONS TODAY
-              </p>
-            )}
-          </div>
-        </div>
+        <MissionLog
+          messages={todayMessages ?? []}
+          reflection={todayReflection ?? null}
+          today={today}
+        />
       </section>
 
       {/* PHOTO MOSAIC */}
