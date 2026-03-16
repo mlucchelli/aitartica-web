@@ -1,6 +1,7 @@
 import Image from "next/image";
 import NavMenu from "../components/NavMenu";
 import TechLogos from "../components/TechLogos";
+import AgentTools from "../components/AgentTools";
 
 
 export default function About() {
@@ -112,6 +113,11 @@ export default function About() {
               </li>
             ))}
           </ul>
+
+          <div style={{ marginTop: 48 }}>
+            <div className="section-label" style={{ marginBottom: 16 }}>Available Tools</div>
+            <AgentTools />
+          </div>
         </div>
       </section>
 
