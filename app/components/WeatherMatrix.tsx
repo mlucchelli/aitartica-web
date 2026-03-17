@@ -93,8 +93,18 @@ function buildGrid(data: WeatherRow[]): Map<string, Map<number, WeatherRow>> {
   return grid;
 }
 
-function getDates(grid: Map<string, Map<number, WeatherRow>>): string[] {
-  return Array.from(grid.keys()).sort();
+const EXPEDITION_START = "2026-03-15";
+const EXPEDITION_END   = "2026-03-30";
+
+function getDateRange(): string[] {
+  const dates: string[] = [];
+  const cur = new Date(EXPEDITION_START + "T00:00:00Z");
+  const end = new Date(EXPEDITION_END   + "T00:00:00Z");
+  while (cur <= end) {
+    dates.push(cur.toISOString().slice(0, 10));
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return dates;
 }
 
 export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
@@ -102,7 +112,7 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
   const [hovered, setHovered] = useState<{ row: WeatherRow; x: number; y: number } | null>(null);
 
   const grid = buildGrid(data);
-  const dates = getDates(grid);
+  const dates = getDateRange();
 
   // Stats
   const allTemps = data.map(r => r.temperature).filter((t): t is number => t !== null);
@@ -159,7 +169,7 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
       <div className="wm-scroll">
         {!hasData ? (
           <div className="wm-empty">
-            <div className="wm-grid-wrap-t" style={{ gridTemplateColumns: `40px repeat(7, 1fr)` }}>
+            <div className="wm-grid-wrap-t" style={{ gridTemplateColumns: `40px repeat(7, 48px)`, gridAutoRows: "22px" }}>
               {/* header row */}
               <div className="wm-hour-label" />
               {Array.from({ length: 7 }).map((_, di) => (
@@ -182,7 +192,7 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
         ) : (
           <div
             className="wm-grid-wrap-t"
-            style={{ gridTemplateColumns: `40px repeat(${dates.length}, 1fr)` }}
+            style={{ gridTemplateColumns: `40px repeat(${dates.length}, 48px)`, gridAutoRows: "22px" }}
             onMouseLeave={() => setHovered(null)}
           >
             {/* Header row: empty corner + day labels */}

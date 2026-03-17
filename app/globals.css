@@ -1013,7 +1013,6 @@ body {
 .wm-grid-wrap-t {
   display: grid;
   gap: 2px;
-  width: 100%;
 }
 
 .wm-hour-label {
