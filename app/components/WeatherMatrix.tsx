@@ -155,63 +155,76 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
         </div>
       )}
 
-      {/* Grid */}
+      {/* Grid — transposed: hours = rows (Y), days = columns (X), newest day rightmost */}
       <div className="wm-scroll">
         {!hasData ? (
           <div className="wm-empty">
-            <div className="wm-grid-wrap">
+            <div className="wm-grid-wrap-t" style={{ gridTemplateColumns: `40px repeat(7, 1fr)` }}>
+              {/* header row */}
+              <div className="wm-hour-label" />
               {Array.from({ length: 7 }).map((_, di) => (
-                <div key={di} className="wm-row">
-                  <span className="wm-day-label wm-day-label--ghost">D{di + 1}</span>
-                  {HOURS.map(h => (
-                    <div key={h} className="wm-cell wm-cell--empty" />
+                <span key={di} className="wm-day-label wm-day-label--ghost">D{di + 1}</span>
+              ))}
+              {/* body */}
+              {HOURS.map(h => (
+                <>
+                  <span key={`h${h}`} className="wm-hour-label" style={{ textAlign: "right", paddingRight: 6 }}>{String(h).padStart(2, "0")}</span>
+                  {Array.from({ length: 7 }).map((_, di) => (
+                    <div key={di} className="wm-cell wm-cell--empty" />
                   ))}
-                </div>
+                </>
               ))}
             </div>
-            <p className="wm-empty-text">
+            <p className="wm-empty-text" style={{ marginTop: 16 }}>
               Expedition begins 2026-03-17 — climate data will populate here.
             </p>
           </div>
         ) : (
-          <div className="wm-grid-wrap" onMouseLeave={() => setHovered(null)}>
-            {/* X axis */}
-            <div className="wm-x-axis">
-              <span className="wm-day-label" style={{ visibility: "hidden" }}>D00</span>
-              {HOURS.map(h => (
-                <span key={h} className="wm-hour-label">
-                  {String(h).padStart(2, "0")}
-                </span>
-              ))}
-            </div>
-
-            {/* Rows */}
+          <div
+            className="wm-grid-wrap-t"
+            style={{ gridTemplateColumns: `40px repeat(${dates.length}, 1fr)` }}
+            onMouseLeave={() => setHovered(null)}
+          >
+            {/* Header row: empty corner + day labels */}
+            <div />
             {dates.map((date, di) => {
-              const daySlots = grid.get(date)!;
               const isToday = date === new Date().toISOString().slice(0, 10);
               return (
-                <div key={date} className={`wm-row${isToday ? " wm-row--today" : ""}`}>
-                  <span className="wm-day-label">D{di + 1}</span>
-                  {HOURS.map(h => {
-                    const row = daySlots.get(h);
-                    const color = row ? cellColor(row, mode) : null;
-                    return (
-                      <div
-                        key={h}
-                        className={`wm-cell${color ? "" : " wm-cell--empty"}`}
-                        style={color ? { backgroundColor: color } : undefined}
-                        onMouseEnter={e => {
-                          if (row) {
-                            const rect = (e.target as HTMLElement).getBoundingClientRect();
-                            setHovered({ row, x: rect.left + rect.width / 2, y: rect.top });
-                          }
-                        }}
-                      />
-                    );
-                  })}
-                </div>
+                <span
+                  key={date}
+                  className={`wm-day-label${isToday ? " wm-day-label--today" : ""}`}
+                  style={{ textAlign: "center", paddingRight: 0 }}
+                >
+                  D{di + 1}
+                </span>
               );
             })}
+
+            {/* One row per hour slot */}
+            {HOURS.map(h => (
+              <>
+                <span key={`h${h}`} className="wm-hour-label" style={{ textAlign: "right", paddingRight: 6, alignSelf: "center" }}>
+                  {String(h).padStart(2, "0")}
+                </span>
+                {dates.map(date => {
+                  const row = grid.get(date)?.get(h);
+                  const color = row ? cellColor(row, mode) : null;
+                  return (
+                    <div
+                      key={date}
+                      className={`wm-cell${color ? "" : " wm-cell--empty"}`}
+                      style={color ? { backgroundColor: color } : undefined}
+                      onMouseEnter={e => {
+                        if (row) {
+                          const rect = (e.target as HTMLElement).getBoundingClientRect();
+                          setHovered({ row, x: rect.left + rect.width / 2, y: rect.top });
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </>
+            ))}
           </div>
         )}
       </div>

@@ -1009,18 +1009,11 @@ body {
   padding-bottom: 4px;
 }
 
-.wm-grid-wrap {
-  display: flex;
-  flex-direction: column;
+/* Transposed grid: CSS grid, rows=hours, cols=days */
+.wm-grid-wrap-t {
+  display: grid;
   gap: 2px;
   width: 100%;
-}
-
-.wm-x-axis {
-  display: grid;
-  grid-template-columns: 28px repeat(12, 1fr);
-  gap: 2px;
-  margin-bottom: 4px;
 }
 
 .wm-hour-label {
@@ -1029,16 +1022,7 @@ body {
   letter-spacing: 0.06em;
   color: var(--text-muted);
   text-align: center;
-}
-
-.wm-row {
-  display: grid;
-  grid-template-columns: 28px repeat(12, 1fr);
-  gap: 2px;
-}
-
-.wm-row--today .wm-day-label {
-  color: var(--cyan);
+  align-self: center;
 }
 
 .wm-day-label {
@@ -1052,9 +1036,10 @@ body {
 }
 
 .wm-day-label--ghost { color: transparent; }
+.wm-day-label--today { color: var(--cyan) !important; }
 
 .wm-cell {
-  height: 20px;
+  height: 22px;
   border-radius: 2px;
   cursor: default;
   transition: opacity 0.12s, transform 0.12s;
@@ -1158,7 +1143,8 @@ body {
 
 @media (max-width: 768px) {
   .wm-container { padding: 48px 20px; }
-  .wm-cell { height: 14px; }
+  .wm-cell { height: 16px; }
+  .wm-scroll { overflow-x: auto; }
 }
 
 /* ─────────────────────────────────── */
