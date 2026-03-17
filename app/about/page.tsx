@@ -115,6 +115,85 @@ export default function About() {
             ))}
           </ul>
 
+          {/* TERMINAL WINDOW */}
+          <div style={{ marginTop: 56 }}>
+            <div className="section-label" style={{ marginBottom: 16 }}>Agent in the Field</div>
+            <div style={{
+              background: "#0d1117",
+              borderRadius: 8,
+              overflow: "hidden",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+              maxWidth: 900,
+            }}>
+              {/* Chrome bar */}
+              <div style={{ background: "#1c2128", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #30363d" }}>
+                <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#f85149", display: "inline-block", flexShrink: 0 }} />
+                <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#e3b341", display: "inline-block", flexShrink: 0 }} />
+                <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#3fb950", display: "inline-block", flexShrink: 0 }} />
+                <span style={{ marginLeft: 12, color: "#7d8590", fontSize: 11, letterSpacing: "0.08em", fontFamily: "'Space Mono', monospace" }}>tmux — agent1</span>
+              </div>
+
+              {/* Terminal body — single pre block, no wrapping */}
+              <div style={{ overflowX: "auto" }}>
+                <pre style={{
+                  margin: 0,
+                  padding: "20px 28px 24px",
+                  fontFamily: "'Space Mono', 'Menlo', 'Consolas', monospace",
+                  fontSize: 12,
+                  lineHeight: 1.7,
+                  color: "#e6edf3",
+                  whiteSpace: "pre",
+                  minWidth: "max-content",
+                }}>
+{/* Logo + header side by side */}
+<span style={{ color: "#00b8d4" }}>{`/|.`}</span>{"          "}<span style={{ color: "#7d8590" }}>agent1</span> <span style={{ color: "#e6edf3" }}>v0.0.1</span> <span style={{ color: "#7d8590" }}>— nosoul</span>{"\n"}
+<span style={{ color: "#00b8d4" }}>{`(°. . 7`}</span>{"       "}<span style={{ color: "#e6edf3" }}>qwen3.5:9b</span>{"\n"}
+<span style={{ color: "#00b8d4" }}>{`|.  "\\`}</span>{"        "}<span style={{ color: "#00b8d4", fontWeight: 700 }}>AItartica</span>{"\n"}
+<span style={{ color: "#00b8d4" }}>{`じし_,)ノ`}</span>{"\n"}
+{"\n"}
+<span style={{ color: "#00b8d4" }}>AItartica:</span> AItartica online.{"\n"}
+<span style={{ color: "#00b8d4" }}>{">"}</span><span style={{ color: "#3fb950" }}> ● </span>check the inbox, anything good?{"\n"}
+{"  "}<span style={{ color: "#00b8d4" }}>▸</span> <span style={{ color: "#7d8590" }}>reasoning...</span>{"\n"}
+{"    "}<span style={{ color: "#00b8d4" }}>▸</span> <span style={{ color: "#7d8590" }}>Scanning the photo inbox for new images to evaluate their potential for upload.</span>{"\n"}
+{"  "}<span style={{ color: "#7d8590" }}>○ scan_photo_inbox</span>{"\n"}
+{"  "}<span style={{ color: "#e3b341" }}>•</span> <span style={{ color: "#00b8d4" }}>analyzing IMG_4036.jpg</span>{"\n"}
+{"  "}<span style={{ color: "#e3b341" }}>•</span> <span style={{ color: "#00b8d4" }}>analyzing IMG_4021.jpg</span>{"\n"}
+{"  "}<span style={{ color: "#e3b341" }}>•</span> <span style={{ color: "#00b8d4" }}>analyzing IMG_3986.jpg</span>{"\n"}
+{"    "}↳ scanned inbox: <span style={{ color: "#e6edf3", fontWeight: 700 }}>3 new, 3 processed</span>{"\n"}
+{"  "}<span style={{ color: "#00b8d4" }}>▸</span> <span style={{ color: "#7d8590" }}>reasoning... (1)</span>{"\n"}
+{"\n"}
+{"  "}<span style={{ color: "#3fb950" }}>▶</span> <span style={{ color: "#7d8590" }}>(1) Inbox scanned: 1 remote candidate (</span><span style={{ color: "#00b8d4" }}>IMG_3986.jpg</span><span style={{ color: "#7d8590" }}>) with score </span><span style={{ color: "#e3b341" }}>0.75</span>{"\n"}
+{"     "}<span style={{ color: "#7d8590" }}>showing cruise ships at harbor. Lacks extraordinary impact — reporting only.</span>{"\n"}
+{"\n"}
+<span style={{ color: "#00b8d4" }}>AItartica:</span> Inbox: <span style={{ color: "#e6edf3", fontWeight: 700 }}>3 photos processed</span>, <span style={{ color: "#e6edf3", fontWeight: 700 }}>1 remote candidate</span> found.{"\n"}
+{"\n"}
+<span style={{ color: "#7d8590" }}>IMG_3986.jpg (score </span><span style={{ color: "#e3b341" }}>0.75</span><span style={{ color: "#7d8590" }}>): Two cruise ships at a pier under dark skies. Tags: ship, mountain.</span>{"\n"}
+<span style={{ color: "#7d8590" }}>Assessment: Not uploading — ordinary harbor scene, lacks behavioral rarity or extraordinary conditions.</span>
+                </pre>
+              </div>
+
+              {/* Status bar — single line, no wrap */}
+              <div style={{
+                background: "#161b22",
+                borderTop: "1px solid #30363d",
+                padding: "5px 16px",
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                fontFamily: "'Space Mono', monospace",
+                fontSize: 11,
+                color: "#7d8590",
+              }}>
+                <span style={{ color: "#e6edf3" }}>█ publish_daily_progress</span>
+                {" | -54.807, -68.306 | "}
+                <span style={{ color: "#00b8d4" }}>7.2°C</span>
+                {" (feels 5.4°C) | idle | "}
+                <span style={{ color: "#3fb950" }}>✓</span>
+                {" publish_daily_progress 22:31 | ↗ 0.0 km | ↑1 | tokens: "}
+                <span style={{ color: "#e6edf3" }}>283,427</span>
+              </div>
+            </div>
+          </div>
+
           <div style={{ marginTop: 48 }}>
             <div className="section-label" style={{ marginBottom: 16 }}>Available Tools</div>
             <AgentTools />

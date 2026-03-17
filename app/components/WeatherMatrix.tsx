@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
 export type WeatherRow = {
   recorded_at: string;
@@ -167,12 +167,12 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
               ))}
               {/* body */}
               {HOURS.map(h => (
-                <>
-                  <span key={`h${h}`} className="wm-hour-label" style={{ textAlign: "right", paddingRight: 6 }}>{String(h).padStart(2, "0")}</span>
+                <React.Fragment key={h}>
+                  <span className="wm-hour-label" style={{ textAlign: "right", paddingRight: 6 }}>{String(h).padStart(2, "0")}</span>
                   {Array.from({ length: 7 }).map((_, di) => (
                     <div key={di} className="wm-cell wm-cell--empty" />
                   ))}
-                </>
+                </React.Fragment>
               ))}
             </div>
             <p className="wm-empty-text" style={{ marginTop: 16 }}>
@@ -202,8 +202,8 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
 
             {/* One row per hour slot */}
             {HOURS.map(h => (
-              <>
-                <span key={`h${h}`} className="wm-hour-label" style={{ textAlign: "right", paddingRight: 6, alignSelf: "center" }}>
+              <React.Fragment key={h}>
+                <span className="wm-hour-label" style={{ textAlign: "right", paddingRight: 6, alignSelf: "center" }}>
                   {String(h).padStart(2, "0")}
                 </span>
                 {dates.map(date => {
@@ -223,7 +223,7 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
                     />
                   );
                 })}
-              </>
+              </React.Fragment>
             ))}
           </div>
         )}
