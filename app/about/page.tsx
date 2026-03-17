@@ -89,6 +89,7 @@ export default function About() {
               { label: "Reasoning", value: "qwen3.5:9b — runs locally, handles route analysis, reflections, and live dispatches" },
               { label: "Vision", value: "qwen2.5vl:3b — scores photo significance (0–1), identifies species with taxonomic precision, generates field observations" },
               { label: "Embeddings", value: "nomic-embed-text — semantic search over the expedition knowledge base: species guides, landing sites, science protocols" },
+              { label: "Weather", value: "Open-Meteo API · ECMWF IFS025 model — European Centre for Medium-Range Weather Forecasts, 0.25° resolution. The world's most accurate operational forecast model, with enhanced precision at polar latitudes where dense satellite coverage and sea-ice assimilation improve output significantly." },
               { label: "Hardware", value: "MacBook Pro M3 Pro · 18 GB unified memory · all inference on-device, no cloud" },
             ].map((item) => (
               <li key={item.label} style={{
