@@ -91,7 +91,7 @@ export default function TechLogos() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "48px 24px", alignItems: "center" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "48px 24px", alignItems: "center" }}>
       {TECHS.map((tech) => (
         <div
           key={tech.name}
