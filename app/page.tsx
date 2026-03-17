@@ -7,7 +7,7 @@ import MapWrapper from "./components/MapWrapper";
 import TokenCounter from "./components/TokenCounter";
 import PhotoGallery from "./components/PhotoGallery";
 import MissionLog from "./components/MissionLog";
-import NavMenu from "./components/NavMenu";
+import SiteNav from "./components/SiteNav";
 import WeatherMatrix from "./components/WeatherMatrix";
 
 type Stat = {
@@ -100,20 +100,7 @@ export default async function Home() {
   return (
     <>
       {/* NAV */}
-      <nav className="nav">
-        <div className="nav-logo">
-          <div className="nav-logo-icon">✦</div>
-          AITARTICA
-        </div>
-        <ul className="nav-links">
-          <li><a href="#expedition">Expedition</a></li>
-          <li><a href="#live">Mission Log</a></li>
-          <li><a href="#gallery">Photo Gallery</a></li>
-          <li><a href="#weather">Climate</a></li>
-          <li><a href="/about">About</a></li>
-        </ul>
-        <NavMenu />
-      </nav>
+      <SiteNav />
 
       {/* HERO */}
       <section className="hero" id="expedition">

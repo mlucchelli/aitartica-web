@@ -1,5 +1,5 @@
 import Image from "next/image";
-import NavMenu from "../components/NavMenu";
+import SiteNav from "../components/SiteNav";
 import TechLogos from "../components/TechLogos";
 import AgentTools from "../components/AgentTools";
 
@@ -8,19 +8,7 @@ export default function About() {
   return (
     <>
       {/* NAV */}
-      <nav className="nav">
-        <a href="/" className="nav-logo">
-          <div className="nav-logo-icon">✦</div>
-          AITARTICA
-        </a>
-        <ul className="nav-links">
-          <li><a href="/">Expedition</a></li>
-          <li><a href="/#live">Mission Log</a></li>
-          <li><a href="/#gallery">Photo Gallery</a></li>
-          <li><a href="/about" style={{ color: "var(--cyan)" }}>About</a></li>
-        </ul>
-        <NavMenu />
-      </nav>
+      <SiteNav />
 
       {/* HERO */}
       <section id="about-hero" style={{

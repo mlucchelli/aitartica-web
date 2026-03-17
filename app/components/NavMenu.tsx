@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from "react";
 
-const NAV_LINKS = [
-  { href: "#expedition", label: "Expedition" },
-  { href: "#live",       label: "Mission Log" },
-  { href: "#gallery",    label: "Photo Gallery" },
-  { href: "#status",     label: "Core Status" },
-  { href: "/about",      label: "About" },
-];
-
-export default function NavMenu() {
+export default function NavMenu({ base = "" }: { base?: string }) {
+  const NAV_LINKS = [
+    { href: `${base}#expedition`, label: "Expedition" },
+    { href: `${base}#live`,       label: "Mission Log" },
+    { href: `${base}#gallery`,    label: "Photo Gallery" },
+    { href: `${base}#weather`,    label: "Climate" },
+    { href: "/about",             label: "About" },
+  ];
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
