@@ -93,6 +93,7 @@ export default function PhotoGallery({ photos, today }: { photos: Photo[]; today
     const days = Object.keys(byDate)
       .filter((d) => d !== "unknown")
       .sort()
+      .reverse()
       .map((date) => ({ date, label: fmtShortDate(date) }));
 
     if (byDate["unknown"]) {
@@ -111,7 +112,7 @@ export default function PhotoGallery({ photos, today }: { photos: Photo[]; today
   const defaultDay = useMemo(() => {
     if (!grouped) return null;
     if (grouped.byDate[today]?.length) return today;
-    return grouped.days.at(-1)?.date ?? null;
+    return grouped.days.at(0)?.date ?? null;
   }, [grouped, today]);
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);

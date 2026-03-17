@@ -91,13 +91,13 @@ export default function TechLogos() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 48 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "48px 24px", alignItems: "center" }}>
       {TECHS.map((tech) => (
         <div
           key={tech.name}
           onMouseEnter={() => setHovered(tech.name)}
           onMouseLeave={() => setHovered(null)}
-          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, position: "relative", cursor: "default" }}
+          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, position: "relative", cursor: "default", justifySelf: "center" }}
         >
           {/* hover tooltip */}
           <div style={{
