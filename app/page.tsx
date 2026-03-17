@@ -8,6 +8,7 @@ import TokenCounter from "./components/TokenCounter";
 import PhotoGallery from "./components/PhotoGallery";
 import MissionLog from "./components/MissionLog";
 import NavMenu from "./components/NavMenu";
+import WeatherMatrix from "./components/WeatherMatrix";
 
 type Stat = {
   label: string;
@@ -33,6 +34,7 @@ export default async function Home() {
     { data: todayMessages },
     { data: photos },
     { data: latestAnalysis },
+    { data: weatherData },
   ] = await Promise.all([
     supabase
       .from("progress")
@@ -65,6 +67,10 @@ export default async function Home() {
       .order("analyzed_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("weather_snapshots")
+      .select("recorded_at, temperature, apparent_temperature, wind_speed, wind_gusts, wind_direction, precipitation, snowfall, condition")
+      .order("recorded_at", { ascending: true }),
   ]);
 
   const rawTokens = progress?.tokens_used_total ?? 0;
@@ -103,6 +109,7 @@ export default async function Home() {
           <li><a href="#expedition">Expedition</a></li>
           <li><a href="#live">Mission Log</a></li>
           <li><a href="#gallery">Photo Gallery</a></li>
+          <li><a href="#weather">Climate</a></li>
           <li><a href="/about">About</a></li>
         </ul>
         <NavMenu />
@@ -179,6 +186,11 @@ export default async function Home() {
           </div>
         </div>
         <PhotoGallery photos={livePhotos} today={today} />
+      </section>
+
+      {/* WEATHER MATRIX */}
+      <section id="weather">
+        <WeatherMatrix data={weatherData ?? []} />
       </section>
 
       {/* DAILY REFLECTION */}
