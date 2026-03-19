@@ -798,6 +798,222 @@ body {
 .lightbox-nav--prev { left: 16px; }
 .lightbox-nav--next { right: 16px; }
 
+/* ─── NAV ANALYSIS ─── */
+.nav-section {
+  padding: 72px 64px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-section-head {
+  margin-bottom: 32px;
+}
+
+.nav-section-title {
+  margin-bottom: 0;
+}
+
+.nav-days-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ── Day card ── */
+.nav-day-card {
+  flex: 0 0 260px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nav-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nav-card-id {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.nav-card-day {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 0.06em;
+}
+
+.nav-card-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.nav-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  padding: 2px 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.nav-status-badge--moving {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+
+.nav-status-badge--stopped {
+  background: rgba(15,26,46,0.06);
+  color: var(--text-muted);
+}
+
+.nav-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ── Compass + stats row ── */
+.nav-card-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+
+.nav-compass-svg {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.nav-card-stats {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.nav-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-stat-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.nav-stat-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.nav-stat-value--highlight {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+/* ── Sites list ── */
+.nav-sites {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-sites-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.nav-site-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.nav-site-rank {
+  color: var(--text-muted);
+  font-size: 8px;
+  min-width: 10px;
+  flex-shrink: 0;
+}
+
+.nav-site-name {
+  flex: 1;
+  color: var(--text);
+  font-size: 9.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-site-data {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.nav-site-dist {
+  color: var(--cyan);
+  font-weight: 700;
+  font-size: 9px;
+}
+
+.nav-site-bear {
+  color: var(--text-muted);
+  font-size: 8px;
+  min-width: 26px;
+  text-align: right;
+}
+
+.nav-site-eta {
+  font-size: 8px;
+  color: var(--text-muted);
+  padding: 1px 4px;
+  background: rgba(15,26,46,0.05);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .nav-section { padding: 48px 20px; }
+  .nav-day-card { flex: 0 0 230px; }
+}
+
 /* ─── REFLECTION ─── */
 .reflection-section {
   background: var(--bg-panel);

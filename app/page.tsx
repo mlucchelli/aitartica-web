@@ -9,6 +9,7 @@ import PhotoGallery from "./components/PhotoGallery";
 import MissionLog from "./components/MissionLog";
 import SiteNav from "./components/SiteNav";
 import WeatherMatrix from "./components/WeatherMatrix";
+import NavAnalysis, { type DayAnalysis } from "./components/NavAnalysis";
 
 type Stat = {
   label: string;
@@ -34,6 +35,7 @@ export default async function Home() {
     { data: todayMessages },
     { data: photos },
     { data: latestAnalysis },
+    { data: allAnalyses },
     { data: weatherData },
   ] = await Promise.all([
     supabase
@@ -68,6 +70,11 @@ export default async function Home() {
       .limit(1)
       .maybeSingle(),
     supabase
+      .from("route_analyses")
+      .select("date, bearing_compass, bearing_deg, speed_kmh, avg_speed_kmh, distance_km, stopped, nearest_sites, analyzed_at")
+      .order("date", { ascending: true })
+      .order("analyzed_at", { ascending: false }),
+    supabase
       .from("weather_snapshots")
       .select("recorded_at, temperature, apparent_temperature, wind_speed, wind_gusts, wind_direction, precipitation, snowfall, condition")
       .order("recorded_at", { ascending: true }),
@@ -84,6 +91,16 @@ export default async function Home() {
 
   function fmtCoord(val: number, posDir: string, negDir: string) {
     return `${Math.abs(val).toFixed(2)}° ${val >= 0 ? posDir : negDir}`;
+  }
+
+  // One entry per day — latest analysis wins (query is already DESC by analyzed_at)
+  const seenDates = new Set<string>();
+  const dailyAnalyses: DayAnalysis[] = [];
+  for (const row of (allAnalyses ?? [])) {
+    if (!seenDates.has(row.date)) {
+      seenDates.add(row.date);
+      dailyAnalyses.push(row as DayAnalysis);
+    }
   }
 
   const expeditionDayLabel = String(expeditionDayCalc);
@@ -179,6 +196,9 @@ export default async function Home() {
       <section id="weather">
         <WeatherMatrix data={weatherData ?? []} />
       </section>
+
+      {/* NAVIGATION ANALYSIS */}
+      <NavAnalysis analyses={dailyAnalyses} />
 
       {/* DAILY REFLECTION */}
       {todayReflection && (
