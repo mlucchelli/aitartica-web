@@ -45,7 +45,7 @@ export default async function Home() {
       .single(),
     supabase
       .from("gps_points")
-      .select("latitude, longitude")
+      .select("latitude, longitude, recorded_at")
       .order("recorded_at", { ascending: true }),
     supabase
       .from("reflections")
@@ -91,13 +91,40 @@ export default async function Home() {
     return `${Math.abs(val).toFixed(2)}° ${val >= 0 ? posDir : negDir}`;
   }
 
+  // Compute distance per Argentina day from GPS points
+  function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+  function utcToARDate(utc: string): string {
+    return new Date(new Date(utc).getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  }
+  const distanceByDay: Record<string, number> = {};
+  const pts = gpsPoints ?? [];
+  for (let i = 1; i < pts.length; i++) {
+    const date = utcToARDate(pts[i].recorded_at);
+    distanceByDay[date] = (distanceByDay[date] ?? 0) +
+      haversineKm(pts[i - 1].latitude, pts[i - 1].longitude, pts[i].latitude, pts[i].longitude);
+  }
+  Object.keys(distanceByDay).forEach((k) => {
+    distanceByDay[k] = Math.round(distanceByDay[k] * 10) / 10;
+  });
+
   // One entry per day — latest analysis wins (query is already DESC by analyzed_at)
   const seenDates = new Set<string>();
   const dailyAnalyses: DayAnalysis[] = [];
   for (const row of (allAnalyses ?? [])) {
     if (!seenDates.has(row.date)) {
       seenDates.add(row.date);
-      dailyAnalyses.push(row as DayAnalysis);
+      dailyAnalyses.push({
+        ...row,
+        distance_km: distanceByDay[row.date] ?? row.distance_km,
+      } as DayAnalysis);
     }
   }
 
