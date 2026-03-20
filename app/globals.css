@@ -654,7 +654,7 @@ body {
 
 /* MASONRY — CSS columns, natural aspect ratios */
 .mosaic-grid {
-  columns: 3;
+  columns: 5;
   column-gap: 2px;
 }
 
@@ -1152,7 +1152,7 @@ body {
   .log-time { display: none; }
 
   .mosaic-section { padding: 48px 20px; }
-  .mosaic-grid { columns: 2; }
+  .mosaic-grid { columns: 3; }
 
   .mosaic-tabs { flex-wrap: wrap; }
 
