@@ -27,18 +27,18 @@ function windDir(deg: number | null): string {
 
 function lerp(a: number, b: number, t: number) { return Math.round(a + (b - a) * t); }
 
-// Meteorological temp scale anchored to Antarctic range: -30 → +15°C
-// Stops: deep-blue → cyan → teal-green → amber → orange
+// Temp scale for Antarctic Peninsula: -10 → +15°C
+// 0°C = light blue (freezing point). Below = deeper blue. Above = green → warm.
 const TEMP_STOPS = [
-  { t: -30, r: 15,  g: 26,  b: 100 },  // deep blue-navy
-  { t: -15, r: 0,   g: 144, b: 168 },  // site cyan
-  { t:   0, r: 30,  g: 180, b: 120 },  // teal-green
-  { t:   8, r: 220, g: 150, b: 40  },  // amber
+  { t: -10, r: 15,  g: 26,  b: 100 },  // deep blue-navy
+  { t:   0, r: 100, g: 190, b: 220 },  // light blue (freezing)
+  { t:   5, r: 30,  g: 180, b: 120 },  // teal-green
+  { t:  10, r: 220, g: 150, b: 40  },  // amber
   { t:  15, r: 210, g: 70,  b: 30  },  // orange-red
 ];
 
 function tempToColor(t: number): string {
-  const clamped = Math.max(-30, Math.min(15, t));
+  const clamped = Math.max(-10, Math.min(15, t));
   for (let i = 1; i < TEMP_STOPS.length; i++) {
     const a = TEMP_STOPS[i - 1], b = TEMP_STOPS[i];
     if (clamped <= b.t) {
@@ -127,7 +127,7 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
 
   // Legend config per mode
   const legends: Record<Mode, { label: string; from: string; to: string; fromLabel: string; toLabel: string }> = {
-    temp: { label: "Temperature", from: "rgb(15,26,100)", to: "rgb(210,70,30)", fromLabel: "−30°C", toLabel: "+15°C" },
+    temp: { label: "Temperature", from: "rgb(15,26,100)", to: "rgb(210,70,30)", fromLabel: "−10°C", toLabel: "+15°C" },
     wind: { label: "Wind Speed", from: "rgb(60,80,110)", to: "rgb(0,168,180)", fromLabel: "0 km/h", toLabel: "80+ km/h" },
     snow: { label: "Snowfall", from: "rgb(90,110,130)", to: "rgb(220,240,250)", fromLabel: "0 mm", toLabel: "5+ mm" },
   };
