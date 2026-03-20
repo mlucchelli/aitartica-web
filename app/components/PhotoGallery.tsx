@@ -11,6 +11,11 @@ type Photo = {
 };
 
 
+function toARDate(utcStr: string): string {
+  return new Date(new Date(utcStr).getTime() - 3 * 60 * 60 * 1000)
+    .toISOString().slice(0, 10);
+}
+
 function fmtShortDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00Z");
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -85,7 +90,7 @@ export default function PhotoGallery({ photos, today }: { photos: Photo[]; today
 
     const byDate: Record<string, Photo[]> = {};
     for (const photo of photos) {
-      const date = photo.recorded_at ? photo.recorded_at.slice(0, 10) : "unknown";
+      const date = photo.recorded_at ? toARDate(photo.recorded_at) : "unknown";
       if (!byDate[date]) byDate[date] = [];
       byDate[date].push(photo);
     }
