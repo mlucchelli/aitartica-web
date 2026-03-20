@@ -10,11 +10,11 @@ type Message = {
 type Reflection = {
   content: string;
   date: string;
-} | null;
+};
 
 interface Props {
   messages: Message[];
-  reflection: Reflection;
+  reflections: Reflection[];
   today: string; // YYYY-MM-DD Argentina
 }
 
@@ -33,16 +33,16 @@ function fmtTime(isoUtc: string): string {
   return new Date(isoUtc).toUTCString().slice(17, 25) + " UTC";
 }
 
-export default function MissionLog({ messages, reflection, today }: Props) {
-  // Build sorted list of available dates (AR) across messages + reflection
+export default function MissionLog({ messages, reflections, today }: Props) {
+  // Build sorted list of available dates (AR) across messages + reflections
   const availableDates = useMemo(() => {
     const set = new Set<string>();
     messages.forEach((m) => set.add(toARDate(m.published_at)));
-    if (reflection) set.add(reflection.date);
+    reflections.forEach((r) => set.add(r.date));
     // Always include today
     set.add(today);
     return Array.from(set).sort();
-  }, [messages, reflection, today]);
+  }, [messages, reflections, today]);
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
 
@@ -55,8 +55,7 @@ export default function MissionLog({ messages, reflection, today }: Props) {
     [messages, selectedDate]
   );
 
-  const dayReflection =
-    reflection?.date === selectedDate ? reflection : null;
+  const dayReflection = reflections.find((r) => r.date === selectedDate) ?? null;
 
   const isEmpty = dayMessages.length === 0 && !dayReflection;
 

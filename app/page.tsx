@@ -31,7 +31,7 @@ export default async function Home() {
   const [
     { data: progress },
     { data: gpsPoints },
-    { data: todayReflection },
+    { data: allReflections },
     { data: todayMessages },
     { data: photos },
     { data: latestAnalysis },
@@ -50,9 +50,7 @@ export default async function Home() {
     supabase
       .from("reflections")
       .select("content, date")
-      .order("date", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+      .order("date", { ascending: false }),
     supabase
       .from("messages")
       .select("content, published_at")
@@ -176,7 +174,7 @@ export default async function Home() {
 
         <MissionLog
           messages={todayMessages ?? []}
-          reflection={todayReflection ?? null}
+          reflections={allReflections ?? []}
           today={today}
         />
       </section>
@@ -201,13 +199,13 @@ export default async function Home() {
       <NavAnalysis analyses={dailyAnalyses} />
 
       {/* DAILY REFLECTION */}
-      {todayReflection && (
+      {allReflections?.[0] && (
         <section className="reflection-section">
           <div className="reflection-day">
             AGENT REFLECTION {progress?.expedition_day != null ? `// DAY ${progress.expedition_day}` : ""}
           </div>
           <div className="reflection-quote-mark">"</div>
-          <p className="reflection-quote">{todayReflection.content}</p>
+          <p className="reflection-quote">{allReflections[0].content}</p>
           <div className="reflection-meta">
             {lastPoint && (
               <div>Field Position <span>{fmtCoord(lastPoint.latitude, "N", "S")}</span></div>
