@@ -44,8 +44,7 @@ CREATE TABLE IF NOT EXISTS weather_snapshots (
 
 -- Photo metadata. File stored in Supabase Storage `photos` bucket.
 CREATE TABLE IF NOT EXISTS photos (
-  id                  BIGSERIAL   PRIMARY KEY,
-  file_name           TEXT        NOT NULL,
+  file_name           TEXT        PRIMARY KEY,
   file_url            TEXT        NOT NULL,
   recorded_at         TIMESTAMPTZ,
   latitude            NUMERIC(9,6),

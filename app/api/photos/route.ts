@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
   const { data: urlData } = supabase.storage.from("photos").getPublicUrl(storagePath);
 
-  const { error: dbError } = await supabase.from("photos").insert({
+  const { error: dbError } = await supabase.from("photos").upsert({
     file_name: fileName,
     file_url: urlData.publicUrl,
     recorded_at: recordedAt,
