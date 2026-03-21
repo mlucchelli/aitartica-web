@@ -513,6 +513,28 @@ body {
 
 .map-tooltip::before { display: none !important; }
 
+.map-tooltip--base {
+  font-size: 9px !important;
+  color: var(--text-dim) !important;
+  opacity: 0.92;
+}
+
+/* Island name labels — no background, pure text */
+.map-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  font-style: italic;
+  color: #4a5568 !important;
+  text-shadow: 0 0 3px rgba(255,255,255,0.9), 0 0 6px rgba(255,255,255,0.7) !important;
+  white-space: nowrap;
+  padding: 0 !important;
+  pointer-events: none;
+}
+.map-label::before { display: none !important; }
+
 /* ─── MISSION LOG ─── */
 .log-section {
   display: grid;
@@ -666,12 +688,32 @@ body {
   background: var(--bg-card);
 }
 
+/* Shimmer skeleton while image loads */
+@keyframes mosaic-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.mosaic-item--shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0%,
+    var(--bg-panel) 50%,
+    var(--bg-card) 100%
+  );
+  background-size: 200% 100%;
+  animation: mosaic-shimmer 1.6s ease-in-out infinite;
+  min-height: 80px;
+}
+
 .mosaic-item img {
   width: 100%;
   height: auto;
   display: block;
-  transition: transform 0.4s ease;
+  transition: transform 0.4s ease, opacity 0.35s ease;
 }
+
+.mosaic-img--loading { opacity: 0; }
+.mosaic-img--loaded  { opacity: 1; }
 
 .mosaic-item:hover img { transform: scale(1.03); }
 
@@ -717,12 +759,39 @@ body {
   flex-direction: column;
 }
 
+.lightbox-img-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 320px;
+  min-height: 200px;
+}
+
+.lightbox-shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: mosaic-shimmer 1.6s ease-in-out infinite;
+}
+
 .lightbox-img {
   max-width: 90vw;
   max-height: 80vh;
   object-fit: contain;
   display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
+
+.lightbox-img.loaded { opacity: 1; }
 
 .lightbox-caption {
   display: flex;

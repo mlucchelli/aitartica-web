@@ -58,7 +58,7 @@ export default async function Home() {
       .order("published_at", { ascending: false }),
     supabase
       .from("photos")
-      .select("id, file_url, vision_summary, agent_quote, recorded_at")
+      .select("id, file_url, vision_summary, agent_quote, recorded_at, width, height")
       .order("recorded_at", { ascending: false })
       .limit(100),
     supabase

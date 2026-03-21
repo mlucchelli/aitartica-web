@@ -8,6 +8,8 @@ type Photo = {
   vision_summary: string | null;
   agent_quote: string | null;
   recorded_at: string | null;
+  width?: number | null;
+  height?: number | null;
 };
 
 
@@ -24,17 +26,24 @@ function fmtShortDate(dateStr: string): string {
 function Lightbox({
   photos,
   index,
+  loadedSet,
   onClose,
   onPrev,
   onNext,
 }: {
   photos: Photo[];
   index: number;
+  loadedSet: Set<string>;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
 }) {
   const photo = photos[index];
+  const [imgLoaded, setImgLoaded] = useState(() => loadedSet.has(photo.file_url));
+
+  useEffect(() => {
+    setImgLoaded(loadedSet.has(photo.file_url));
+  }, [index, photo.file_url, loadedSet]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -59,7 +68,16 @@ function Lightbox({
       )}
 
       <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-        <img src={photo.file_url} alt={photo.vision_summary ?? "Expedition photo"} className="lightbox-img" />
+        <div className="lightbox-img-wrap">
+          {!imgLoaded && <div className="lightbox-shimmer" />}
+          <img
+            src={photo.file_url}
+            alt={photo.vision_summary ?? "Expedition photo"}
+            className={`lightbox-img${imgLoaded ? " loaded" : ""}`}
+            onLoad={() => setImgLoaded(true)}
+            ref={(el) => { if (el?.complete) setImgLoaded(true); }}
+          />
+        </div>
         {caption && (
           <div className="lightbox-caption">
             <span className="lightbox-caption-text">{caption}</span>
@@ -85,6 +103,12 @@ function Lightbox({
 const ALL_TAB = "__all__";
 
 export default function PhotoGallery({ photos, today }: { photos: Photo[]; today: string }) {
+  const [loadedSet, setLoadedSet] = useState<Set<string>>(() => new Set());
+
+  const markLoaded = useCallback((url: string) => {
+    setLoadedSet(prev => prev.has(url) ? prev : new Set([...prev, url]));
+  }, []);
+
   const grouped = useMemo(() => {
     if (photos.length === 0) return null;
 
@@ -164,26 +188,39 @@ export default function PhotoGallery({ photos, today }: { photos: Photo[]; today
         </button>
       </div>
       <div className="mosaic-grid">
-        {visiblePhotos.map((photo, i) => (
-          <div
-            key={photo.id}
-            className="mosaic-item"
-            style={{ cursor: "pointer" }}
-            onClick={() => setLightboxIndex(i)}
-          >
-            <img src={photo.file_url} alt={photo.vision_summary ?? "Expedition photo"} loading="lazy" />
-            <div className="mosaic-item-overlay" />
-            {(photo.agent_quote ?? photo.vision_summary) && (
-              <div className="mosaic-item-label">{photo.agent_quote ?? photo.vision_summary}</div>
-            )}
-          </div>
-        ))}
+        {visiblePhotos.map((photo, i) => {
+          const isLoaded = loadedSet.has(photo.file_url);
+          return (
+            <div
+              key={photo.id}
+              className={`mosaic-item${isLoaded ? "" : " mosaic-item--shimmer"}`}
+              style={{ cursor: "pointer" }}
+              onClick={() => setLightboxIndex(i)}
+            >
+              <img
+                src={photo.file_url}
+                alt={photo.vision_summary ?? "Expedition photo"}
+                loading="lazy"
+                width={photo.width ?? undefined}
+                height={photo.height ?? undefined}
+                className={isLoaded ? "mosaic-img--loaded" : "mosaic-img--loading"}
+                onLoad={() => markLoaded(photo.file_url)}
+                ref={(el) => { if (el?.complete) markLoaded(photo.file_url); }}
+              />
+              <div className="mosaic-item-overlay" />
+              {(photo.agent_quote ?? photo.vision_summary) && (
+                <div className="mosaic-item-label">{photo.agent_quote ?? photo.vision_summary}</div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {lightboxIndex != null && (
         <Lightbox
           photos={visiblePhotos}
           index={lightboxIndex}
+          loadedSet={loadedSet}
           onClose={closeLightbox}
           onPrev={prevPhoto}
           onNext={nextPhoto}
