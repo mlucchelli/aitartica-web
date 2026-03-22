@@ -75,16 +75,28 @@ function cellColor(row: WeatherRow, mode: Mode): string | null {
   return null;
 }
 
+// Convert UTC timestamp to Argentina time (UTC-3)
+function toART(utcStr: string): { date: string; hour: number } {
+  const ms = new Date(utcStr).getTime() - 3 * 60 * 60 * 1000;
+  const d = new Date(ms);
+  const date = d.toISOString().slice(0, 10);
+  const hour = d.getUTCHours();
+  return { date, hour };
+}
+
+// Argentina "today" date string
+function todayART(): string {
+  return toART(new Date().toISOString()).date;
+}
+
 // Build grid: { "2026-03-15": { 12: WeatherRow, 14: WeatherRow, ... }, ... }
 function buildGrid(data: WeatherRow[]): Map<string, Map<number, WeatherRow>> {
   const grid = new Map<string, Map<number, WeatherRow>>();
   for (const row of data) {
-    const date = row.recorded_at.slice(0, 10);
-    const hour = new Date(row.recorded_at).getUTCHours();
+    const { date, hour } = toART(row.recorded_at);
     // Snap to nearest 2h slot
     const slot = Math.round(hour / 2) * 2;
     if (!grid.has(date)) grid.set(date, new Map());
-    // If multiple readings fall in same slot, keep the one closer to the slot center
     const existing = grid.get(date)!.get(slot);
     if (!existing) {
       grid.get(date)!.set(slot, row);
@@ -198,7 +210,7 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
             {/* Header row: empty corner + day labels */}
             <div />
             {dates.map((date, di) => {
-              const isToday = date === new Date().toISOString().slice(0, 10);
+              const isToday = date === todayART();
               return (
                 <span
                   key={date}
@@ -261,7 +273,12 @@ export default function WeatherMatrix({ data }: { data: WeatherRow[] }) {
           }}
         >
           <div className="wm-tooltip-date">
-            {new Date(hovered.row.recorded_at).toUTCString().slice(0, 22)} UTC
+            {(() => {
+              const { date, hour } = toART(hovered.row.recorded_at);
+              const d = new Date(date + "T00:00:00Z");
+              const label = d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).toUpperCase();
+              return `${label} ${String(hour).padStart(2, "0")}:${new Date(new Date(hovered.row.recorded_at).getTime() - 3*60*60*1000).getUTCMinutes().toString().padStart(2,"0")} ART`;
+            })()}
           </div>
           <div className="wm-tooltip-row">
             Temp <strong>{hovered.row.temperature?.toFixed(1) ?? "—"}°</strong>
