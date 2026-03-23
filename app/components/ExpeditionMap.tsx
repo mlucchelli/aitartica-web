@@ -9,6 +9,7 @@ type LatLon = [number, number];
 interface Props {
   track: LatLon[];
   expeditionDay: number | null;
+  currentPos?: LatLon | null;
 }
 
 const ISLAND_LABELS: { name: string; pos: LatLon }[] = [
@@ -76,7 +77,7 @@ function getBounds(track: LatLon[]): { center: LatLon; zoom: number } {
   return { center, zoom };
 }
 
-export default function ExpeditionMap({ track, expeditionDay }: Props) {
+export default function ExpeditionMap({ track, expeditionDay, currentPos }: Props) {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const L = require("leaflet");
@@ -90,7 +91,7 @@ export default function ExpeditionMap({ track, expeditionDay }: Props) {
 
   const { center, zoom } = useMemo(() => getBounds(track), [track]);
   const start = track[0];
-  const current = track[track.length - 1];
+  const current = currentPos ?? track[track.length - 1];
   const isLive = track.length > 0;
 
   return (

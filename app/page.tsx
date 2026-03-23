@@ -31,6 +31,7 @@ export default async function Home() {
   const [
     { data: progress },
     { data: gpsPoints },
+    { data: latestGpsPoint },
     { data: allReflections },
     { data: todayMessages },
     { data: photos },
@@ -47,6 +48,13 @@ export default async function Home() {
       .from("gps_points")
       .select("latitude, longitude, recorded_at")
       .order("recorded_at", { ascending: true }),
+    // Separate query for latest point — bypasses the 1000-row PostgREST cap
+    supabase
+      .from("gps_points")
+      .select("latitude, longitude, recorded_at")
+      .order("recorded_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
     supabase
       .from("reflections")
       .select("content, date")
@@ -85,7 +93,11 @@ export default async function Home() {
   const track = (gpsPoints ?? []).map(
     (p): [number, number] => [p.latitude, p.longitude]
   );
-  const lastPoint = gpsPoints?.at(-1) ?? null;
+  const lastPoint = latestGpsPoint ?? gpsPoints?.at(-1) ?? null;
+  // If latest point is beyond the 1000-row cap, append it so the polyline connects
+  if (lastPoint && (track.length === 0 || track[track.length - 1][0] !== lastPoint.latitude || track[track.length - 1][1] !== lastPoint.longitude)) {
+    track.push([lastPoint.latitude, lastPoint.longitude]);
+  }
 
   function fmtCoord(val: number, posDir: string, negDir: string) {
     return `${Math.abs(val).toFixed(2)}° ${val >= 0 ? posDir : negDir}`;
@@ -190,7 +202,7 @@ export default async function Home() {
             )}
           </div>
           <div className="map-container-tall">
-            <MapWrapper track={track} expeditionDay={progress?.expedition_day ?? expeditionDayCalc} />
+            <MapWrapper track={track} expeditionDay={progress?.expedition_day ?? expeditionDayCalc} currentPos={lastPoint ? [lastPoint.latitude, lastPoint.longitude] : null} />
             {latestAnalysis && (
               <div className="map-overlay">
                 {`HEADING: ${Math.round(latestAnalysis.bearing_deg ?? 0)}° ${latestAnalysis.bearing_compass ?? ""}`}

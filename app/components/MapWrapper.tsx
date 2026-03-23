@@ -7,6 +7,7 @@ type LatLon = [number, number];
 interface Props {
   track: LatLon[];
   expeditionDay: number | null;
+  currentPos?: LatLon | null;
 }
 
 const ExpeditionMap = dynamic(() => import("./ExpeditionMap"), {
@@ -14,6 +15,6 @@ const ExpeditionMap = dynamic(() => import("./ExpeditionMap"), {
   loading: () => <div className="map-loading">LOADING MAP...</div>,
 });
 
-export default function MapWrapper({ track, expeditionDay }: Props) {
-  return <ExpeditionMap track={track} expeditionDay={expeditionDay} />;
+export default function MapWrapper({ track, expeditionDay, currentPos }: Props) {
+  return <ExpeditionMap track={track} expeditionDay={expeditionDay} currentPos={currentPos} />;
 }
