@@ -19,6 +19,26 @@ type Stat = {
   node?: ReactNode;
 };
 
+type GpsPoint = { latitude: number; longitude: number; recorded_at: string };
+
+async function fetchAllGpsPoints(): Promise<GpsPoint[]> {
+  const PAGE = 1000;
+  const all: GpsPoint[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from("gps_points")
+      .select("latitude, longitude, recorded_at")
+      .order("recorded_at", { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error || !data || data.length === 0) break;
+    all.push(...data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return all;
+}
+
 
 export default async function Home() {
   // "Today" anchored to Argentina time (UTC-3)
@@ -30,8 +50,7 @@ export default async function Home() {
 
   const [
     { data: progress },
-    { data: gpsPoints },
-    { data: latestGpsPoint },
+    gpsPoints,
     { data: allReflections },
     { data: todayMessages },
     { data: photos },
@@ -44,17 +63,7 @@ export default async function Home() {
       .select("expedition_day, distance_km_total, wildlife_spotted_total, temperature_min_all_time, tokens_used_total, photos_captured_total, published_at")
       .eq("id", 1)
       .single(),
-    supabase
-      .from("gps_points")
-      .select("latitude, longitude, recorded_at")
-      .order("recorded_at", { ascending: true }),
-    // Separate query for latest point — bypasses the 1000-row PostgREST cap
-    supabase
-      .from("gps_points")
-      .select("latitude, longitude, recorded_at")
-      .order("recorded_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    fetchAllGpsPoints(),
     supabase
       .from("reflections")
       .select("content, date")
@@ -90,14 +99,10 @@ export default async function Home() {
 
   const livePhotos = photos ?? [];
 
-  const track = (gpsPoints ?? []).map(
+  const track = gpsPoints.map(
     (p): [number, number] => [p.latitude, p.longitude]
   );
-  const lastPoint = latestGpsPoint ?? gpsPoints?.at(-1) ?? null;
-  // If latest point is beyond the 1000-row cap, append it so the polyline connects
-  if (lastPoint && (track.length === 0 || track[track.length - 1][0] !== lastPoint.latitude || track[track.length - 1][1] !== lastPoint.longitude)) {
-    track.push([lastPoint.latitude, lastPoint.longitude]);
-  }
+  const lastPoint = gpsPoints.at(-1) ?? null;
 
   function fmtCoord(val: number, posDir: string, negDir: string) {
     return `${Math.abs(val).toFixed(2)}° ${val >= 0 ? posDir : negDir}`;
@@ -117,7 +122,7 @@ export default async function Home() {
     return new Date(new Date(utc).getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
   }
   const distanceByDay: Record<string, number> = {};
-  const pts = gpsPoints ?? [];
+  const pts = gpsPoints;
   for (let i = 1; i < pts.length; i++) {
     const date = utcToARDate(pts[i].recorded_at);
     distanceByDay[date] = (distanceByDay[date] ?? 0) +
