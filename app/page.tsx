@@ -10,6 +10,7 @@ import MissionLog from "./components/MissionLog";
 import SiteNav from "./components/SiteNav";
 import WeatherMatrix from "./components/WeatherMatrix";
 import NavAnalysis, { type DayAnalysis } from "./components/NavAnalysis";
+import DrakePassage from "./components/DrakePassage";
 
 type Stat = {
   label: string;
@@ -57,6 +58,7 @@ export default async function Home() {
     { data: latestAnalysis },
     { data: allAnalyses },
     { data: weatherData },
+    { data: oceanObs },
   ] = await Promise.all([
     supabase
       .from("progress")
@@ -93,6 +95,10 @@ export default async function Home() {
       .from("weather_snapshots")
       .select("recorded_at, temperature, apparent_temperature, wind_speed, wind_gusts, wind_direction, precipitation, snowfall, condition")
       .order("recorded_at", { ascending: true }),
+    supabase
+      .from("ocean_observations")
+      .select("analyzed_at, wave_height_m, sea_state, beaufort, swell_direction, drake_assessment, confidence")
+      .order("analyzed_at", { ascending: true }),
   ]);
 
   const rawTokens = progress?.tokens_used_total ?? 0;
@@ -190,6 +196,13 @@ export default async function Home() {
           </div>
         ))}
       </div>
+
+      {/* DRAKE PASSAGE */}
+      <DrakePassage
+        weather={(weatherData ?? []).at(-1) ?? null}
+        currentLat={lastPoint?.latitude ?? null}
+        oceanData={oceanObs ?? []}
+      />
 
       {/* MAP + MISSION LOG */}
       <section className="map-log-section" id="live">

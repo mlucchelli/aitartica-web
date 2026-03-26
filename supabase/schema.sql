@@ -94,6 +94,20 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Vision-based ocean observations during Drake crossing. Append-only.
+-- Agent analyzes photos from the ship to estimate sea state, wave height, etc.
+CREATE TABLE IF NOT EXISTS ocean_observations (
+  id               BIGSERIAL   PRIMARY KEY,
+  wave_height_m    NUMERIC(5,2),
+  sea_state        TEXT,
+  beaufort         INTEGER,
+  swell_direction  TEXT,
+  drake_assessment TEXT,
+  confidence       TEXT,
+  analyzed_at      TIMESTAMPTZ NOT NULL,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Expedition-wide running totals. Always one row (upserted).
 CREATE TABLE IF NOT EXISTS progress (
   id                       INTEGER PRIMARY KEY DEFAULT 1,
