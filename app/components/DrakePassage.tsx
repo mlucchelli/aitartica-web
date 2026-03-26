@@ -30,12 +30,10 @@ export type OceanObservation = {
 
 interface Props {
   weather: DrakeWeather | null;
+  crossingPct: number;
   currentLat: number | null;
   oceanData?: OceanObservation[];
 }
-
-const DRAKE_NORTH = -55.0; // Cabo de Hornos side
-const DRAKE_SOUTH = -62.0; // South Shetland side
 
 function windDir(deg: number | null): string {
   if (deg === null) return "";
@@ -51,11 +49,6 @@ function getDrakeState(windSpeed: number | null): { label: string; sublabel: str
   return               { label: "STORM CONDITIONS", sublabel: "Severe weather · Survival mode",     level: "shake"    };
 }
 
-function getCrossingProgress(lat: number | null): number {
-  if (lat === null) return 0;
-  const clamped = Math.max(DRAKE_SOUTH, Math.min(DRAKE_NORTH, lat));
-  return (clamped - DRAKE_SOUTH) / (DRAKE_NORTH - DRAKE_SOUTH); // 0 = south (start), 1 = north (destination)
-}
 
 type WaveLevel = "lake" | "moderate" | "shake";
 
@@ -72,16 +65,13 @@ function toARLabel(utc: string) {
   return `${d.toISOString().slice(0, 10)} ${d.toISOString().slice(11, 16)} ART`;
 }
 
-export default function DrakePassage({ weather, currentLat, oceanData = [] }: Props) {
+export default function DrakePassage({ weather, crossingPct, currentLat, oceanData = [] }: Props) {
   const [pulse, setPulse] = useState(false);
   const [selectedObs, setSelectedObs] = useState<OceanObservation | null>(null);
 
   const computed = getDrakeState(weather?.wind_speed ?? null);
   const activeLevel: WaveLevel = selectedObs ? obsToLevel(selectedObs) : computed.level;
   const state = { ...computed, level: activeLevel };
-
-  const progress = getCrossingProgress(currentLat);
-  const progressPct = Math.round(progress * 100);
 
   useEffect(() => {
     if (state.level !== "shake") { setPulse(false); return; }
@@ -120,14 +110,14 @@ export default function DrakePassage({ weather, currentLat, oceanData = [] }: Pr
         <div className="drake-crossing">
           <div className="drake-crossing-labels">
             <span>SOUTH SHETLAND IS.</span>
-            <span>TIERRA DEL FUEGO</span>
+            <span>USHUAIA</span>
           </div>
           <div className="drake-bar-track">
-            <div className="drake-bar-fill" style={{ width: `${progressPct}%` }} />
-            <div className="drake-bar-ship" style={{ left: `${progressPct}%` }}>⬡</div>
+            <div className="drake-bar-fill" style={{ width: `${crossingPct}%` }} />
+            <div className="drake-bar-ship" style={{ left: `${crossingPct}%` }}>⬡</div>
           </div>
           <div className="drake-crossing-pct">
-            {progressPct}% crossed · {currentLat ? `${Math.abs(currentLat).toFixed(2)}°S` : "—"}
+            {crossingPct}% crossed · {currentLat ? `${Math.abs(currentLat).toFixed(2)}°S` : "—"}
           </div>
         </div>
 

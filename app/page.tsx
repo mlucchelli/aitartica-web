@@ -198,11 +198,33 @@ export default async function Home() {
       </div>
 
       {/* DRAKE PASSAGE */}
-      <DrakePassage
-        weather={(weatherData ?? []).at(-1) ?? null}
-        currentLat={lastPoint?.latitude ?? null}
-        oceanData={oceanObs ?? []}
-      />
+      {(() => {
+        // Destination: Ushuaia, Argentina
+        const USHUAIA: [number, number] = [-54.8, -68.3];
+
+        // Start: GPS point closest in time to first ocean observation
+        let crossingPct = 0;
+        const obs = oceanObs ?? [];
+        if (obs.length > 0 && lastPoint) {
+          const startTime = new Date(obs[0].analyzed_at).getTime();
+          const startGps = gpsPoints.reduce((best, p) =>
+            Math.abs(new Date(p.recorded_at).getTime() - startTime) <
+            Math.abs(new Date(best.recorded_at).getTime() - startTime) ? p : best
+          );
+          const distTraveled = haversineKm(startGps.latitude, startGps.longitude, lastPoint.latitude, lastPoint.longitude);
+          const distTotal    = haversineKm(startGps.latitude, startGps.longitude, USHUAIA[0], USHUAIA[1]);
+          crossingPct = distTotal > 0 ? Math.min(100, Math.round((distTraveled / distTotal) * 100)) : 0;
+        }
+
+        return (
+          <DrakePassage
+            weather={(weatherData ?? []).at(-1) ?? null}
+            crossingPct={crossingPct}
+            currentLat={lastPoint?.latitude ?? null}
+            oceanData={obs}
+          />
+        );
+      })()}
 
       {/* MAP + MISSION LOG */}
       <section className="map-log-section" id="live">
