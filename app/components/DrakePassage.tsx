@@ -53,10 +53,16 @@ function getDrakeState(windSpeed: number | null): { label: string; sublabel: str
 type WaveLevel = "lake" | "moderate" | "shake";
 
 function obsToLevel(obs: OceanObservation): WaveLevel {
+  const h = obs.wave_height_m;
+  if (h != null) {
+    if (h >= 5) return "shake";
+    if (h >= 2) return "moderate";
+    return "lake";
+  }
+  // fallback to beaufort if no wave height
   const bf = obs.beaufort ?? 0;
-  const ss = obs.sea_state ?? "";
-  if (bf >= 8 || ["very rough", "high", "storm"].includes(ss)) return "shake";
-  if (bf >= 5 || ["rough", "moderate"].includes(ss)) return "moderate";
+  if (bf >= 8) return "shake";
+  if (bf >= 5) return "moderate";
   return "lake";
 }
 
@@ -230,7 +236,7 @@ function WaveHistogram({ data, selected, onSelect }: {
             {readings.map((d, i) => {
               const h = d.wave_height_m!;
               const pct = (h / scale) * 100;
-              const isStorm = (d.beaufort ?? 0) >= 8 || h >= 4;
+              const isStorm = h >= 5;
               const isSelected = selected?.analyzed_at === d.analyzed_at;
               const prev = i > 0 ? toARDate(readings[i - 1].analyzed_at) : null;
               const thisDay = toARDate(d.analyzed_at);
